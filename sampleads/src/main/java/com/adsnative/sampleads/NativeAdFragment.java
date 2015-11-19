@@ -35,7 +35,6 @@ public class NativeAdFragment extends Fragment {
                 ANLog.d("PUBLISHER CALLBACK : onAdLoaded()");
                 nativeAdContainer.removeAllViews();
                 nativeAdContainer.addView(mNativeAd.renderAdView(nativeAdUnit));
-                nativeAdUnit.getCustomFields();
             }
 
             @Override
