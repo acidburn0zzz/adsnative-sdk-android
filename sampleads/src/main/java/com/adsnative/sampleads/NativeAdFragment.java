@@ -58,6 +58,7 @@ public class NativeAdFragment extends Fragment {
                 .bindAssetsWithDefaultKeys(getActivity())
                 .build();
         mNativeAd.registerViewBinder(anAdViewBinder);
+        mNativeAd.loadAd();
 
         return view;
     }
@@ -70,8 +71,29 @@ public class NativeAdFragment extends Fragment {
 
     @Override
     public void onResume() {
-        // AdsNative recommends loading new ads when the user returns to your activity.
+        mNativeAd = new ANNativeAd(getActivity(), AD_UNIT_ID);
+        mNativeAd.setNativeAdListener(new ANAdListener() {
+            @Override
+            public void onAdLoaded(NativeAdUnit nativeAdUnit) {
+            }
+            @Override
+            public void onAdFailed(String s) {
+            }
+            @Override
+            public void onAdImpressionRecorded() {
+            }
+            @Override
+            public void onAdClicked() {
+            }
+        });
+        final ANAdViewBinder anAdViewBinder = new ANAdViewBinder.Builder(R.layout.list_view_ad_unit)
+                .bindAssetsWithDefaultKeys(getActivity())
+                .build();
+        mNativeAd.registerViewBinder(anAdViewBinder);
         mNativeAd.loadAd();
+
+        // AdsNative recommends loading new ads when the user returns to your activity.
+        // mNativeAd.loadAd();
         super.onResume();
     }
 }
