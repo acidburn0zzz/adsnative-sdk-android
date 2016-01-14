@@ -1,6 +1,7 @@
 package com.adsnative.mediation;
 
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 
@@ -43,6 +44,8 @@ public class FlurryAdNetwork extends CustomAdNetwork {
         try {
             flurryApiKey = customEventClassData.getString(FLURRY_API_KEY);
             placementId = customEventClassData.getString(PLACEMENT_ID_KEY);
+            ANLog.d("FlurryAdNetwork -> flurryApiKey : " + flurryApiKey);
+            ANLog.d("FlurryAdNetwork -> placementId : " + placementId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -63,7 +66,6 @@ public class FlurryAdNetwork extends CustomAdNetwork {
         adNative.setListener(flurryNativeAd);
         flurryNativeAd.setFlurryNative(adNative);
         flurryNativeAd.loadAd();
-
     }
 
     static class FlurryNativeAd extends BaseNativeAd implements FlurryAdNativeListener {
@@ -71,8 +73,10 @@ public class FlurryAdNetwork extends CustomAdNetwork {
         private final CustomEventListener mCustomEventListener;
         private FlurryAdNative mFlurryNativeAd;
 
+        private boolean adRequestCompleted = false;
+
         FlurryNativeAd(final Context context,
-                         final CustomEventListener customEventListener) {
+                       final CustomEventListener customEventListener) {
             mContext = context.getApplicationContext();
             mCustomEventListener = customEventListener;
         }
@@ -82,39 +86,74 @@ public class FlurryAdNetwork extends CustomAdNetwork {
         }
 
         void loadAd() {
-            ANLog.e("FlurryAdNetwork#loadAd()");
+            ANLog.d("FlurryAdNetwork -> loadAd()");
             mFlurryNativeAd.fetchAd();
+            new CountDownTimer(5000, 5000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // do nothing
+                }
+                @Override
+                public void onFinish() {
+                    // make another fetchAd() call after 5 secs
+                    if (!adRequestCompleted) {
+                        ANLog.e("FlurryAdNetwork -> loadAd() -> CountDownTimer -> fetchAd()");
+                        mFlurryNativeAd.fetchAd();
+                        new CountDownTimer(2000, 2000) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                                // do nothing
+                            }
+                            @Override
+                            public void onFinish() {
+                                if (!adRequestCompleted) {
+                                    // terminate all ad calls if they ever return after 7 secs
+                                    adRequestCompleted = true;
+                                    mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_NO_FILL);
+                                }
+                            }
+                        }.start();
+                    }
+                }
+            }.start();
         }
 
         // FlurryAdNativeListener
         @Override
         public void onFetched(FlurryAdNative flurryAdNative) {
-            ANLog.e("FlurryAdNetwork#onFetched()");
+            if (adRequestCompleted) {
+                // if ad request is complete already, return immediately
+                return;
+            }
+
+            adRequestCompleted = true;
+
+            ANLog.d("FlurryAdNetwork -> onFetched()");
 
             FlurryAdNativeAsset title = flurryAdNative.getAsset("headline");
-            ANLog.e("FlurryAdNetwork#title: " + title);
+            ANLog.d("FlurryAdNetwork#title: " + title);
             if (title != null) {
                 setTitle(title.getValue());
             }
             FlurryAdNativeAsset summary = flurryAdNative.getAsset("summary");
-            ANLog.e("FlurryAdNetwork#summary: " + summary);
+            ANLog.d("FlurryAdNetwork#summary: " + summary);
             if (summary != null) {
                 setSummary(summary.getValue());
             }
             FlurryAdNativeAsset iconImage = flurryAdNative.getAsset("secImage");
-            ANLog.e("FlurryAdNetwork#iconImage: " + iconImage);
+            ANLog.d("FlurryAdNetwork#iconImage: " + iconImage);
             if (iconImage != null) {
                 setIconImage(iconImage.getValue());
             }
             FlurryAdNativeAsset mainImage = flurryAdNative.getAsset("secOrigImg");
-            ANLog.e("FlurryAdNetwork#mainImage: " + mainImage);
+            ANLog.d("FlurryAdNetwork#mainImage: " + mainImage);
             if (mainImage != null) {
                 setMainImage(mainImage.getValue());
             }
             FlurryAdNativeAsset appCategory = flurryAdNative.getAsset("appCategory");
-            ANLog.e("FlurryAdNetwork#appCategory: " + appCategory);
+            ANLog.d("FlurryAdNetwork#appCategory: " + appCategory);
             FlurryAdNativeAsset appRating = flurryAdNative.getAsset("appRating");
-            ANLog.e("FlurryAdNetwork#appRating: " + appRating);
+            ANLog.d("FlurryAdNetwork#appRating: " + appRating);
             String cta = "Read More";
             if (appCategory != null || appRating != null) {
                 cta = "Install Now";
@@ -141,12 +180,13 @@ public class FlurryAdNetwork extends CustomAdNetwork {
 
                     @Override
                     public void onImagesFailedToCache(ErrorCode errorCode) {
-                        ANLog.e("FacebookAdNetwork: " + errorCode);
+                        ANLog.e("FacebookAdNetwork -> preCacheImages -> onImagesFailedToCache(): " + errorCode);
                         mCustomEventListener.onNativeAdFailed(errorCode);
                     }
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                ANLog.e("FacebookAdNetwork -> preCacheImages -> IOException: " + e.getMessage());
+                mCustomEventListener.onNativeAdFailed(ErrorCode.IMAGE_DOWNLOAD_FAILURE);
             }
         }
 
@@ -177,6 +217,11 @@ public class FlurryAdNetwork extends CustomAdNetwork {
 
         @Override
         public void onError(FlurryAdNative flurryAdNative, FlurryAdErrorType flurryAdErrorType, int i) {
+            if (adRequestCompleted) {
+                // if ad request is complete already, return immediately
+                return;
+            }
+            adRequestCompleted = true;
             ANLog.e("FlurryAdNetwork#onError: " + flurryAdErrorType.name());
             ANLog.e("Error:"+flurryAdErrorType.toString()+" CODE:"+i);
             mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_NO_FILL);
