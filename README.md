@@ -8,3 +8,6 @@ This is AdsNative monetization SDK for Android platform, exclusively for Native 
 4. Pre-fetch and caching images for optimized network bandwidth usage on devices
 
 Please go through our [Wiki](https://github.com/picatcha/adsnative-sdk-android/wiki) on how to integrate native ads with our SDK.
+
+## New in this version
+Please see the [changelog](https://github.com/picatcha/adsnative-sdk-android/blob/master/CHANGELOG.md) for what's new in this version
