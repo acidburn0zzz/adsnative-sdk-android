@@ -25,7 +25,10 @@ import java.util.List;
 import static com.adsnative.util.Json.getJsonValue;
 import static com.adsnative.util.Numbers.parseDouble;
 
-class InMobiAdNetwork extends CustomAdNetwork {
+/**
+ * Created by sreekanth on 17/09/15.
+ */
+public class InMobiAdNetwork extends CustomAdNetwork {
     private static final String PLACEMENT_ID_KEY = "placementId";
 
     // CustomAdNetwork implementation
@@ -131,7 +134,9 @@ class InMobiAdNetwork extends CustomAdNetwork {
 
                     @Override
                     public void onImagesFailedToCache(ErrorCode errorCode) {
-                        mCustomEventNativeListener.onNativeAdFailed(errorCode);
+                        ANLog.e("InMobiAdNetwork: " + errorCode);
+                        mCustomEventNativeListener.onNativeAdLoaded(InMobiNativeAd.this);
+                        // mCustomEventNativeListener.onNativeAdFailed(errorCode);
                     }
                 });
             } catch (IOException e) {
@@ -164,6 +169,8 @@ class InMobiAdNetwork extends CustomAdNetwork {
             final JSONObject jsonObject = new JSONObject((String) inMobiNative.getAdContent());
 
             ANLog.d("InMobiAdNetwork ad response json: " + jsonObject.toString());
+
+            setProviderName(InMobiAdNetwork.class.getName());
 
             setTitle((String) getJsonValue(jsonObject, TITLE, String.class));
             setSummary((String) getJsonValue(jsonObject, DESCRIPTION, String.class));

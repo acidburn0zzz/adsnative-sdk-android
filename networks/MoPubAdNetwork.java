@@ -9,6 +9,7 @@ import com.adsnative.ads.ErrorCode;
 import com.adsnative.mediation.CustomAdNetwork;
 import com.adsnative.network.AdResponse;
 import com.adsnative.util.ANLog;
+import com.mopub.common.util.Drawables;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +50,8 @@ public class MoPubAdNetwork extends CustomAdNetwork {
     }
 
     static class MoPubNativeAd extends BaseNativeAd {
-        private static final String SOCIAL_CONTEXT_FOR_AD = "socialContextForAd";
+        private static final String MOPUB_AD_CHOICES_CLICKTHROUGH_URL =
+                "http://www.mopub.com/optout";
 
         private final Context mContext;
         private final String mAdUnitId;
@@ -94,12 +96,14 @@ public class MoPubAdNetwork extends CustomAdNetwork {
 
         public void onNativeLoad(final com.mopub.network.AdResponse adResponse) {
             JSONObject adJSON = adResponse.getJsonBody();
-            ANLog.e(adResponse.getStringBody());
+            ANLog.d(adResponse.getStringBody());
 
             if (adJSON == null) {
                 mCustomEventListener.onNativeAdFailed(ErrorCode.EMPTY_AD_RESPONSE);
                 return;
             }
+
+            setProviderName(MoPubAdNetwork.class.getName());
 
             String title = (String) adJSON.opt("title");
             if (title != null) {
@@ -127,6 +131,9 @@ public class MoPubAdNetwork extends CustomAdNetwork {
             }
             setPromotedByTag("Sponsored");
 
+            setAdChoicesDrawable(Drawables.NATIVE_PRIVACY_INFORMATION_ICON.createDrawable(mContext));
+            setAdChoicesClickThroughUrl(MOPUB_AD_CHOICES_CLICKTHROUGH_URL);
+
             final List<String> imageUrls = new ArrayList<String>();
             final String mainImageUrl = getMainImage();
             if (mainImageUrl != null) {
@@ -147,7 +154,8 @@ public class MoPubAdNetwork extends CustomAdNetwork {
                     @Override
                     public void onImagesFailedToCache(ErrorCode errorCode) {
                         ANLog.e("MoPubAdNetwork: " + errorCode);
-                        mCustomEventListener.onNativeAdFailed(errorCode);
+                        mCustomEventListener.onNativeAdLoaded(MoPubNativeAd.this);
+                        // mCustomEventListener.onNativeAdFailed(errorCode);
                     }
                 });
             } catch (IOException e) {
@@ -162,7 +170,7 @@ public class MoPubAdNetwork extends CustomAdNetwork {
                         addImpressionTracker(trackers.getString(i));
                     } catch (JSONException e) {
                         // This will only occur if we access a non-existent index in JSONArray.
-                        ANLog.d("Unable to parse impression trackers from MoPubAdNetwork");
+                        ANLog.e("Unable to parse impression trackers from MoPubAdNetwork");
                     }
                 }
             }
@@ -175,7 +183,7 @@ public class MoPubAdNetwork extends CustomAdNetwork {
                         addClickTracker(trackers.getString(i));
                     } catch (JSONException e) {
                         // This will only occur if we access a non-existent index in JSONArray.
-                        ANLog.d("Unable to parse click trackers from MoPubAdNetwork");
+                        ANLog.e("Unable to parse click trackers from MoPubAdNetwork");
                     }
                 }
             } else if (clkTrackers instanceof String) {

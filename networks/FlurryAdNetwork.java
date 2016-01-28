@@ -97,7 +97,7 @@ public class FlurryAdNetwork extends CustomAdNetwork {
                 public void onFinish() {
                     // make another fetchAd() call after 5 secs
                     if (!adRequestCompleted) {
-                        ANLog.e("FlurryAdNetwork -> loadAd() -> CountDownTimer -> fetchAd()");
+                        ANLog.d("FlurryAdNetwork -> loadAd() -> CountDownTimer -> fetchAd()");
                         mFlurryNativeAd.fetchAd();
                         new CountDownTimer(2000, 2000) {
                             @Override
@@ -129,6 +129,8 @@ public class FlurryAdNetwork extends CustomAdNetwork {
             adRequestCompleted = true;
 
             ANLog.d("FlurryAdNetwork -> onFetched()");
+
+            setProviderName(FlurryAdNetwork.class.getName());
 
             FlurryAdNativeAsset title = flurryAdNative.getAsset("headline");
             ANLog.d("FlurryAdNetwork#title: " + title);
@@ -181,12 +183,14 @@ public class FlurryAdNetwork extends CustomAdNetwork {
                     @Override
                     public void onImagesFailedToCache(ErrorCode errorCode) {
                         ANLog.e("FacebookAdNetwork -> preCacheImages -> onImagesFailedToCache(): " + errorCode);
-                        mCustomEventListener.onNativeAdFailed(errorCode);
+                        mCustomEventListener.onNativeAdLoaded(FlurryNativeAd.this);
+                        // mCustomEventListener.onNativeAdFailed(errorCode);
                     }
                 });
             } catch (IOException e) {
                 ANLog.e("FacebookAdNetwork -> preCacheImages -> IOException: " + e.getMessage());
-                mCustomEventListener.onNativeAdFailed(ErrorCode.IMAGE_DOWNLOAD_FAILURE);
+                mCustomEventListener.onNativeAdLoaded(FlurryNativeAd.this);
+                // mCustomEventListener.onNativeAdFailed(ErrorCode.IMAGE_DOWNLOAD_FAILURE);
             }
         }
 
