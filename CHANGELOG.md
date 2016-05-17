@@ -6,3 +6,10 @@
 4. Impression and Click callbacks are now exposed on ANListAdapter and ANRecyclerAdapter
 5. Publishers can override click-through landing url for their direct sold campaigns
 6. Bug fixes and performance improvements
+
+
+## v2.5.1
+1. Added AdColony Network
+2. Added support to render the complete Views provided by Custom Networks.
+3. Updated Gradle to 2.1.0
+
