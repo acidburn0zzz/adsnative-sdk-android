@@ -7,11 +7,13 @@ import com.adsnative.ads.BaseNativeAd;
 import com.adsnative.ads.ErrorCode;
 import com.adsnative.network.AdResponse;
 import com.adsnative.util.ANLog;
+
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.AdListener;
 import com.facebook.ads.AdSettings;
 import com.facebook.ads.ImpressionListener;
+import com.facebook.ads.MediaView;
 import com.facebook.ads.NativeAd;
 import com.facebook.ads.NativeAd.Rating;
 
@@ -35,10 +37,10 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                                 final AdResponse adResponse) {
 
         String placementId = null;
-        JSONObject customEventClassData = adResponse.getCustomAdNetworkData();
+        JSONObject customAdNetworkData = adResponse.getCustomAdNetworkData();
         try {
-            placementId = customEventClassData.getString(PLACEMENT_ID_KEY);
-            ANLog.e("FacebookAdNetwork: " + placementId);
+            placementId = customAdNetworkData.getString(PLACEMENT_ID_KEY);
+            ANLog.d("FacebookAdNetwork: " + placementId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -70,9 +72,6 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         }
 
         void loadAd() {
-            // for testing purpose only
-            AdSettings.addTestDevice("8409a7303438f26bbe3dd223c381d3d1");
-            // for testing purpose only
             mFbNativeAd.setAdListener(this);
             mFbNativeAd.setImpressionListener(this);
             mFbNativeAd.loadAd();
@@ -81,7 +80,7 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         // AdListener
         @Override
         public void onAdLoaded(final Ad ad) {
-            ANLog.e("FacebookAdNetwork#onAdLoaded");
+            ANLog.d("FacebookAdNetwork#onAdLoaded");
             // This identity check is from Facebook's Native API sample code:
             // https://developers.facebook.com/docs/audience-network/android/native-api
             if (!mFbNativeAd.equals(ad) || !mFbNativeAd.isAdLoaded()) {
@@ -89,6 +88,8 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                 mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_INVALID_STATE);
                 return;
             }
+
+            setProviderName(FacebookAdNetwork.class.getName());
 
             setTitle(mFbNativeAd.getAdTitle());
             setSummary(mFbNativeAd.getAdBody());
@@ -102,7 +103,16 @@ public class FacebookAdNetwork extends CustomAdNetwork {
             setCallToAction(mFbNativeAd.getAdCallToAction());
             setStarRating(getDoubleRating(mFbNativeAd.getAdStarRating()));
 
+            NativeAd.Image adChoices = mFbNativeAd.getAdChoicesIcon();
+            setAdChoicesIcon(adChoices == null ? null : adChoices.getUrl());
+            setAdChoicesClickThroughUrl(mFbNativeAd.getAdChoicesLinkUrl());
+
             setPromotedByTag("Sponsored");
+
+            setType("facebook");
+            MediaView fbMediaView = new MediaView(mContext);
+            fbMediaView.setNativeAd(mFbNativeAd);
+            setMediaView(fbMediaView);
 
             addCustomField(SOCIAL_CONTEXT_FOR_AD, mFbNativeAd.getAdSocialContext());
 
@@ -126,7 +136,8 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                     @Override
                     public void onImagesFailedToCache(ErrorCode errorCode) {
                         ANLog.e("FacebookAdNetwork: " + errorCode);
-                        mCustomEventListener.onNativeAdFailed(errorCode);
+                        mCustomEventListener.onNativeAdLoaded(FacebookNativeAd.this);
+                        // mCustomEventListener.onNativeAdFailed(errorCode);
                     }
                 });
             } catch (IOException e) {
