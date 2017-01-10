@@ -13,3 +13,7 @@
 2. Added support to render the complete Views provided by Custom Networks.
 3. Updated Gradle to 2.1.0
 
+## v2.5.2
+1. Added ShareThrough Network.
+2. Added support for Facebook videos.
+3. Updated Gradle to 2.2.2
