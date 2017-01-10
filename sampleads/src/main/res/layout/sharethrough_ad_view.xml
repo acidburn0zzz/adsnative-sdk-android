@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_marginLeft="84dp"
+        android:layout_marginTop="32dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:layout_width="match_parent" />
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/black" />
+
+    <ImageView
+        android:id="@+id/optout"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        />
+    <TextView
+        android:id="@+id/slug"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <TextView
+        android:id="@+id/advertiser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Advertiser Name"
+        />
+
+    <ImageView
+        android:id="@+id/brand_logo"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@null"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:scaleType="fitXY"/>
+
+    <FrameLayout
+        android:id="@+id/thumbnail"
+        android:layout_width="fill_parent"
+        android:layout_height="270dp"
+        android:layout_below="@+id/slug"
+        android:layout_centerHorizontal="true" />
+
+    />
+
+</RelativeLayout>

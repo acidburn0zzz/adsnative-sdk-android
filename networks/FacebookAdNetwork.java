@@ -13,6 +13,7 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.AdListener;
 import com.facebook.ads.AdSettings;
 import com.facebook.ads.ImpressionListener;
+import com.facebook.ads.MediaView;
 import com.facebook.ads.NativeAd;
 import com.facebook.ads.NativeAd.Rating;
 
@@ -71,9 +72,6 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         }
 
         void loadAd() {
-            // for testing purpose only
-            AdSettings.addTestDevice("8409a7303438f26bbe3dd223c381d3d1");
-            // for testing purpose only
             mFbNativeAd.setAdListener(this);
             mFbNativeAd.setImpressionListener(this);
             mFbNativeAd.loadAd();
@@ -110,6 +108,11 @@ public class FacebookAdNetwork extends CustomAdNetwork {
             setAdChoicesClickThroughUrl(mFbNativeAd.getAdChoicesLinkUrl());
 
             setPromotedByTag("Sponsored");
+
+            setType("facebook");
+            MediaView fbMediaView = new MediaView(mContext);
+            fbMediaView.setNativeAd(mFbNativeAd);
+            setMediaView(fbMediaView);
 
             addCustomField(SOCIAL_CONTEXT_FOR_AD, mFbNativeAd.getAdSocialContext());
 
