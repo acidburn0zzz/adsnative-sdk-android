@@ -2,7 +2,7 @@
 
 This is AdsNative monetization SDK for Android platform, exclusively for Native Ads. Android app developers can monetize their apps by including our SDK which supports following features.
 
-1. Mediation support for all major Native ad networks and platforms including Facebook, Twitter, Yahoo & InMobi
+1. Mediation support for all major Native ad networks and platforms including Facebook, Twitter, Yahoo, InMobi & ShareThrough
 2. Dynamic Ad Layouts
 3. Dynamic Ad Positions for content stream ads
 4. Pre-fetch and caching images for optimized network bandwidth usage on devices
