@@ -27,6 +27,15 @@ public class ANSampleActivity extends FragmentActivity {
             }
         });
 
+        Button btnRecyclerView = (Button) findViewById(R.id.btn_recycler_view);
+        btnRecyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RecyclerViewFragment recyclerViewFragment = new RecyclerViewFragment();
+                loadFragment(recyclerViewFragment, true, true);
+            }
+        });
+
         Button btnNativeAd = (Button) findViewById(R.id.btn_native_ad);
         btnNativeAd.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -12,10 +12,17 @@
         android:text="Ads in List View" />
 
     <Button
-        android:id="@+id/btn_native_ad"
+        android:id="@+id/btn_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_below="@+id/btn_list_view"
+        android:text="Ads in Recycler View" />
+
+    <Button
+        android:id="@+id/btn_native_ad"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/btn_recycler_view"
         android:text="Native Ad" />
 
     <FrameLayout

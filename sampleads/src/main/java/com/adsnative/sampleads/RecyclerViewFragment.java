@@ -2,19 +2,22 @@ package com.adsnative.sampleads;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.adsnative.ads.ANAdPositions;
 import com.adsnative.ads.ANAdViewBinder;
-import com.adsnative.ads.ANListAdapter;
+import com.adsnative.ads.ANRecyclerAdapter;
 
-public class ListViewFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    private ANListAdapter mListAdapter;
+public class RecyclerViewFragment extends Fragment {
+
+    private ANRecyclerAdapter mRecyclerAdapter;
 
     private String AD_UNIT_ID = "NosADe7KvUy4b326YAeoGdVcIhxIwhKFAlje1GWv";
 
@@ -24,14 +27,17 @@ public class ListViewFragment extends Fragment {
                              final Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        final View view = inflater.inflate(R.layout.fragment_list_view, container, false);
-        final ListView listView = (ListView) view.findViewById(R.id.native_list_view);
+        final View view = inflater.inflate(R.layout.fragment_recycler_view, container, false);
+        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.native_recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1);
+        List<String> items = new ArrayList<String>();
         for (int i = 0; i < 100; ++i) {
-            adapter.add("Placement " + i);
+            items.add("Recycler Placement " + i);
         }
+
+        final MyRecyclerAdapter originalAdapter = new MyRecyclerAdapter(getActivity(), items);
 
         /*
         // Create an ad adapter that gets its positioning information from the AdsNative Ad Server.
@@ -44,9 +50,9 @@ public class ListViewFragment extends Fragment {
         // This adapter will be used in place of the original adapter for the ListView.
         ANAdPositions.ClientPositions clientPositions = ANAdPositions.clientPositioning();
         clientPositions.addFixedPosition(5);
-        clientPositions.enableRepeatingPositions(10);
+        clientPositions.enableRepeatingPositions(18);
 
-        mListAdapter = new ANListAdapter(getActivity(), adapter, AD_UNIT_ID, clientPositions);
+        mRecyclerAdapter = new ANRecyclerAdapter(getActivity(), originalAdapter, AD_UNIT_ID, clientPositions);
 
         // Set up an renderer that knows how to put ad data in an ad view.
         final ANAdViewBinder anAdViewBinder = new ANAdViewBinder.Builder(R.layout.fan_native_layout)
@@ -54,9 +60,9 @@ public class ListViewFragment extends Fragment {
                         .build();
 
         // Register the renderer with the ANListAdapter and then set the adapter on the ListView.
-        mListAdapter.registerViewBinder(anAdViewBinder);
-        listView.setAdapter(mListAdapter);
-        mListAdapter.loadAds();
+        mRecyclerAdapter.registerViewBinder(anAdViewBinder);
+        recyclerView.setAdapter(mRecyclerAdapter);
+        mRecyclerAdapter.loadAds();
 
         return view;
     }
@@ -64,7 +70,7 @@ public class ListViewFragment extends Fragment {
     @Override
     public void onDestroyView() {
         // You must call this or the ad adapter may cause a memory leak.
-        mListAdapter.destroy();
+        mRecyclerAdapter.destroy();
         super.onDestroyView();
     }
 

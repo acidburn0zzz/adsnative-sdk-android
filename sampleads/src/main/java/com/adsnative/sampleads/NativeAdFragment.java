@@ -16,8 +16,8 @@ import com.adsnative.util.ANLog;
 public class NativeAdFragment extends Fragment {
 
     private ANNativeAd mNativeAd;
-    // private String AD_UNIT_ID = "2bMP97UQpLEiavFiqi7Cnw2BpDmqEau_ZUdDQzug";
-    private String AD_UNIT_ID = "I6jzxM3nheJk4RVIstiPKGN7YHOBKag-Q_5b0AnV";
+
+    private String AD_UNIT_ID = "NosADe7KvUy4b326YAeoGdVcIhxIwhKFAlje1GWv";
 
     @Override
     public View onCreateView(final LayoutInflater inflater,
@@ -32,30 +32,32 @@ public class NativeAdFragment extends Fragment {
         mNativeAd.setNativeAdListener(new ANAdListener() {
             @Override
             public void onAdLoaded(NativeAdUnit nativeAdUnit) {
-                ANLog.d("PUBLISHER CALLBACK : onAdLoaded()");
+                ANLog.e("PUBLISHER CALLBACK : onAdLoaded()");
                 nativeAdContainer.removeAllViews();
                 nativeAdContainer.addView(mNativeAd.renderAdView(nativeAdUnit));
             }
 
             @Override
             public void onAdFailed(String message) {
-                ANLog.d("PUBLISHER CALLBACK : onAdFailed()");
+                ANLog.e("PUBLISHER CALLBACK : onAdFailed() - " + message);
             }
 
             @Override
             public void onAdImpressionRecorded() {
-                ANLog.d("PUBLISHER CALLBACK : onAdImpressionRecorded()");
+                ANLog.e("PUBLISHER CALLBACK : onAdImpressionRecorded()");
             }
 
             @Override
-            public void onAdClicked() {
-                ANLog.d("PUBLISHER CALLBACK : onAdClicked()");
+            public boolean onAdClicked(NativeAdUnit nativeAdUnit) {
+                ANLog.e("PUBLISHER CALLBACK : onAdClicked()");
+                return false;
             }
         });
 
         // Set up view binder that knows how to put ad data in an ad view.
-        final ANAdViewBinder anAdViewBinder = new ANAdViewBinder.Builder(R.layout.list_view_ad_unit)
+        final ANAdViewBinder anAdViewBinder = new ANAdViewBinder.Builder(R.layout.fan_native_layout)
                 .bindAssetsWithDefaultKeys(getActivity())
+                .bindAdChoices(R.id.an_ad_choices)
                 .build();
         mNativeAd.registerViewBinder(anAdViewBinder);
         mNativeAd.loadAd();
@@ -66,32 +68,12 @@ public class NativeAdFragment extends Fragment {
     @Override
     public void onDestroyView() {
         // You must call this or the ad adapter may cause a memory leak.
+        mNativeAd.destroy();
         super.onDestroyView();
     }
 
     @Override
     public void onResume() {
-        mNativeAd = new ANNativeAd(getActivity(), AD_UNIT_ID);
-        mNativeAd.setNativeAdListener(new ANAdListener() {
-            @Override
-            public void onAdLoaded(NativeAdUnit nativeAdUnit) {
-            }
-            @Override
-            public void onAdFailed(String s) {
-            }
-            @Override
-            public void onAdImpressionRecorded() {
-            }
-            @Override
-            public void onAdClicked() {
-            }
-        });
-        final ANAdViewBinder anAdViewBinder = new ANAdViewBinder.Builder(R.layout.list_view_ad_unit)
-                .bindAssetsWithDefaultKeys(getActivity())
-                .build();
-        mNativeAd.registerViewBinder(anAdViewBinder);
-        mNativeAd.loadAd();
-
         // AdsNative recommends loading new ads when the user returns to your activity.
         // mNativeAd.loadAd();
         super.onResume();
