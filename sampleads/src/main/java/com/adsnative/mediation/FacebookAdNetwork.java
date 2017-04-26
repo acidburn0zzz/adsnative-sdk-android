@@ -37,23 +37,45 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                                 final AdResponse adResponse) {
 
         String placementId = null;
-        JSONObject customAdNetworkData = adResponse.getCustomAdNetworkData();
+        JSONObject customAdNetworkData = null;
+        if (adResponse != null) {
+            customAdNetworkData = adResponse.getCustomAdNetworkData();
+        } else {
+            ANLog.e("Attempted to invoke getCustomAdNetworkData on null adResponse");
+        }
         try {
-            placementId = customAdNetworkData.getString(PLACEMENT_ID_KEY);
-            ANLog.d("FacebookAdNetwork: " + placementId);
+            if (customAdNetworkData != null) {
+                placementId = customAdNetworkData.getString(PLACEMENT_ID_KEY);
+//            placementId = "202991423187328_724667197686412";
+                ANLog.d("FacebookAdNetwork: " + placementId);
+            } else {
+                ANLog.e("Attempted to invoke getString on null customAdNetworkData");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         if (placementId == null || placementId.length() <= 0) {
             ANLog.e("FacebookAdNetwork: " + ErrorCode.NATIVE_ADAPTER_CONFIGURATION_ERROR);
-            customEventListener.onNativeAdFailed(ErrorCode.NATIVE_ADAPTER_CONFIGURATION_ERROR);
+            if (customEventListener != null) {
+                customEventListener.onNativeAdFailed(ErrorCode.NATIVE_ADAPTER_CONFIGURATION_ERROR);
+            } else {
+                ANLog.e("Attempted to invoke onNativeAdFailed on null customEventListener");
+            }
             return;
         }
-
-        final FacebookNativeAd facebookNativeAd =
-                new FacebookNativeAd(context,
-                        new NativeAd(context, placementId), customEventListener);
-        facebookNativeAd.loadAd();
+        // handle any exception that might come from 3rd party class
+        try {
+            final FacebookNativeAd facebookNativeAd =
+                    new FacebookNativeAd(context,
+                            new NativeAd(context, placementId), customEventListener);
+            if (facebookNativeAd != null) {
+                facebookNativeAd.loadAd();
+            } else {
+                ANLog.e("Attempted to invoke loadAd on null facebookNativeAd");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     static class FacebookNativeAd extends BaseNativeAd implements AdListener, ImpressionListener {
@@ -72,9 +94,16 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         }
 
         void loadAd() {
-            mFbNativeAd.setAdListener(this);
-            mFbNativeAd.setImpressionListener(this);
-            mFbNativeAd.loadAd();
+            // for testing purpose only
+//            AdSettings.addTestDevice("8d98c3d2ec70e7d185403ed007386f12");
+            // for testing purpose only
+            if (mFbNativeAd != null) {
+                mFbNativeAd.setAdListener(this);
+                mFbNativeAd.setImpressionListener(this);
+                mFbNativeAd.loadAd();
+            } else {
+                ANLog.e("mFbNativeAd is null");
+            }
         }
 
         // AdListener
@@ -83,9 +112,12 @@ public class FacebookAdNetwork extends CustomAdNetwork {
             ANLog.d("FacebookAdNetwork#onAdLoaded");
             // This identity check is from Facebook's Native API sample code:
             // https://developers.facebook.com/docs/audience-network/android/native-api
-            if (!mFbNativeAd.equals(ad) || !mFbNativeAd.isAdLoaded()) {
+
+            if (mFbNativeAd != null && !mFbNativeAd.equals(ad) || !mFbNativeAd.isAdLoaded()) {
                 ANLog.e("FacebookAdNetwork: " + ErrorCode.NETWORK_INVALID_STATE);
-                mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_INVALID_STATE);
+                if (mCustomEventListener != null) {
+                    mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_INVALID_STATE);
+                }
                 return;
             }
 
@@ -178,19 +210,31 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         // BaseNativeAd
         @Override
         public void prepare(final View view) {
-            mFbNativeAd.registerViewForInteraction(view);
-            setOverridingClickTracker(true);
-            setOverridingImpressionTracker(true);
+            if (mFbNativeAd != null) {
+                mFbNativeAd.registerViewForInteraction(view);
+                setOverridingClickTracker(true);
+                setOverridingImpressionTracker(true);
+            } else {
+                ANLog.e("Attempted to invoke registerViewForInteraction on null mFbNativeAd");
+            }
         }
 
         @Override
         public void clear(final View view) {
-            mFbNativeAd.unregisterView();
+            if (mFbNativeAd != null) {
+                mFbNativeAd.unregisterView();
+            } else {
+                ANLog.e("Attempted to invoke unregisterView on null mFbNativeAd");
+            }
         }
 
         @Override
         public void destroy() {
-            mFbNativeAd.destroy();
+            if (mFbNativeAd != null) {
+                mFbNativeAd.destroy();
+            } else {
+                ANLog.e("Attempted to invoke destroy on null mFbNativeAd");
+            }
         }
 
         private Double getDoubleRating(final Rating rating) {

@@ -32,9 +32,19 @@ public class MoPubAdNetwork extends CustomAdNetwork {
                                 final AdResponse adResponse) {
 
         String placementId = null;
-        JSONObject customEventClassData = adResponse.getCustomAdNetworkData();
+        JSONObject customAdNetworkData = null;
+        if (adResponse != null) {
+            customAdNetworkData = adResponse.getCustomAdNetworkData();
+        } else {
+            ANLog.e("Attempted to invoke getCustomAdNetworkData on null adResponse");
+        }
         try {
-            placementId = customEventClassData.getString(PLACEMENT_ID_KEY);
+            if (customAdNetworkData != null) {
+                placementId = customAdNetworkData.getString(PLACEMENT_ID_KEY);
+                ANLog.d("MoPubAdNetwork: " + placementId);
+            } else {
+                ANLog.e("Attempted to invoke getString on null customAdNetworkData");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -43,10 +53,18 @@ public class MoPubAdNetwork extends CustomAdNetwork {
             customEventListener.onNativeAdFailed(ErrorCode.NATIVE_ADAPTER_CONFIGURATION_ERROR);
             return;
         }
-
-        final MoPubNativeAd mopubNativeAd =
-                new MoPubNativeAd(context, placementId, customEventListener);
-        mopubNativeAd.loadAd();
+        // handle any exception that might come from 3rd party class
+        try {
+            final MoPubNativeAd mopubNativeAd =
+                    new MoPubNativeAd(context, placementId, customEventListener);
+            if (mopubNativeAd != null) {
+                mopubNativeAd.loadAd();
+            } else {
+                ANLog.e("mopubNativeAd is null");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     static class MoPubNativeAd extends BaseNativeAd {
@@ -74,31 +92,39 @@ public class MoPubAdNetwork extends CustomAdNetwork {
             final NativeUrlGenerator generator = new NativeUrlGenerator(mContext)
                     .withAdUnitId(mAdUnitId)
                     .withRequest(null);
-            final String endpointUrl = generator.generateUrlString("ads.mopub.com");
-            com.mopub.network.AdRequest.Listener mVolleyListener = new com.mopub.network.AdRequest.Listener() {
-                @Override
-                public void onSuccess(com.mopub.network.AdResponse adResponse) {
-                    onNativeLoad(adResponse);
-                }
+            if (generator != null) {
+                final String endpointUrl = generator.generateUrlString("ads.mopub.com");
+                com.mopub.network.AdRequest.Listener mVolleyListener = new com.mopub.network.AdRequest.Listener() {
+                    @Override
+                    public void onSuccess(com.mopub.network.AdResponse adResponse) {
+                        onNativeLoad(adResponse);
+                    }
 
-                @Override
-                public void onErrorResponse(@NonNull final com.mopub.volley.VolleyError volleyError) {
-                    onNativeFail(volleyError);
+                    @Override
+                    public void onErrorResponse(@NonNull final com.mopub.volley.VolleyError volleyError) {
+                        onNativeFail(volleyError);
+                    }
+                };
+                com.mopub.network.AdRequest mNativeRequest =
+                        new com.mopub.network.AdRequest(endpointUrl,
+                                com.mopub.common.AdFormat.NATIVE, mAdUnitId,
+                                mContext, mVolleyListener);
+                com.mopub.volley.RequestQueue requestQueue = com.mopub.network.Networking.getRequestQueue(mContext);
+                if (requestQueue != null) {
+                    requestQueue.add(mNativeRequest);
                 }
-            };
-            com.mopub.network.AdRequest mNativeRequest =
-                    new com.mopub.network.AdRequest(endpointUrl,
-                            com.mopub.common.AdFormat.NATIVE, mAdUnitId,
-                            mContext, mVolleyListener);
-            com.mopub.volley.RequestQueue requestQueue = com.mopub.network.Networking.getRequestQueue(mContext);
-            requestQueue.add(mNativeRequest);
+            }
         }
 
         public void onNativeLoad(final com.mopub.network.AdResponse adResponse) {
+            if (adResponse == null && mCustomEventListener != null) {
+                mCustomEventListener.onNativeAdFailed(ErrorCode.EMPTY_AD_RESPONSE);
+                return;
+            }
             JSONObject adJSON = adResponse.getJsonBody();
             ANLog.d(adResponse.getStringBody());
 
-            if (adJSON == null) {
+            if (adJSON == null && mCustomEventListener!= null) {
                 mCustomEventListener.onNativeAdFailed(ErrorCode.EMPTY_AD_RESPONSE);
                 return;
             }
@@ -154,7 +180,9 @@ public class MoPubAdNetwork extends CustomAdNetwork {
                     @Override
                     public void onImagesFailedToCache(ErrorCode errorCode) {
                         ANLog.e("MoPubAdNetwork: " + errorCode);
-                        mCustomEventListener.onNativeAdLoaded(MoPubNativeAd.this);
+                        if (mCustomEventListener != null) {
+                            mCustomEventListener.onNativeAdLoaded(MoPubNativeAd.this);
+                        }
                         // mCustomEventListener.onNativeAdFailed(errorCode);
                     }
                 });
@@ -195,7 +223,9 @@ public class MoPubAdNetwork extends CustomAdNetwork {
 
         public void onNativeFail(com.mopub.volley.VolleyError volleyError) {
             ANLog.e("MoPubAdNetwork: " + volleyError.getMessage());
-            mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_NO_FILL);
+            if (mCustomEventListener != null) {
+                mCustomEventListener.onNativeAdFailed(ErrorCode.NETWORK_NO_FILL);
+            }
         }
 
         // BaseNativeAd
