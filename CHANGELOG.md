@@ -6,15 +6,18 @@
 5. Publishers can override click-through landing url for their direct sold campaigns
 6. Bug fixes and performance improvements
 
+
 ## v2.5.1
 1. Added AdColony Network
 2. Added support to render the complete Views provided by Custom Networks.
 3. Updated Gradle to 2.1.0
 
+
 ## v2.5.2
 1. Added ShareThrough Network.
 2. Added support for Facebook videos.
 3. Updated Gradle to 2.2.2
+
 
 ## v2.5.3
 1. Bug Fix - Upon loading video, back up image loads after few seconds and overrides the video
@@ -24,8 +27,10 @@
 5. Bug Fix - SDK crash while fetching advertising id due to a bug in Google Play Services
 6. Replaced deprecated GooglePlayServicesUtil class with GoogleApiAvailability class
 
+
 ## v2.5.4
 1. Bug Fix - SDK crash in content stream ads when placement is paused.
+
 
 ## v2.6.0
 1. Bug Fix - Fallback not happening if there's an exception in one of the networks
