@@ -33,10 +33,11 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:10.0.1'
     compile 'com.google.android.gms:play-services-location:10.0.1'
     compile(name:'adcolony', ext:'jar')
-    compile(name:'adsnative-sdk-2.5.3', ext:'aar')
+    compile(name:'adsnative-sdk-2.6.1', ext:'aar')
     compile 'com.facebook.android:audience-network-sdk:4.16.1'
     compile(name:'InMobi-5.0.0', ext:'jar')
-    compile('com.mopub:mopub-sdk:4.0.0@aar')
+    compile('com.mopub:mopub-sdk-base:4.11.0@aar')
+    compile('com.mopub:mopub-sdk-native-static:4.11.0@aar')
     compile('com.mopub.volley:mopub-volley:1.1.0@aar')
     compile(name:'FlurryAds-6.1.0', ext:'jar')
     compile(name:'FlurryAnalytics-6.1.0', ext:'jar')
