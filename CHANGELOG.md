@@ -1,3 +1,6 @@
+## v2.6.2
+1. Handle scenarios when one of the device info is empty
+
 ## v2.6.1
 1. Added support for MoPub client server bidding
 2. Added Polymorph adapter to work with MoPub SDK mediation
