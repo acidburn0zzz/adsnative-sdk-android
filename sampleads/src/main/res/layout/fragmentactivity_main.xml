@@ -22,8 +22,15 @@
         android:id="@+id/btn_native_ad"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_below="@+id/btn_recycler_view"
+        android:layout_below="@+id/btn_dfp_native_ad"
         android:text="Native Ad" />
+
+    <Button
+        android:id="@+id/btn_dfp_native_ad"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/btn_recycler_view"
+        android:text="DFP Header Bidding" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

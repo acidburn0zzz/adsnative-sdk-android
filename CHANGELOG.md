@@ -1,3 +1,6 @@
+## v2.7.0
+1. Added support for DFP client server bidding
+
 ## v2.6.2
 1. Handle scenarios when one of the device info is empty
 

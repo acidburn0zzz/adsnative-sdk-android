@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 public class ANSampleActivity extends FragmentActivity {
 
@@ -41,6 +42,14 @@ public class ANSampleActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
                 NativeAdFragment nativeAdFragment = new NativeAdFragment();
+                loadFragment(nativeAdFragment, true, true);
+            }
+        });
+        Button btnDFPNativeAd = (Button) findViewById(R.id.btn_dfp_native_ad);
+        btnDFPNativeAd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DFPNativeAd nativeAdFragment = new DFPNativeAd();
                 loadFragment(nativeAdFragment, true, true);
             }
         });

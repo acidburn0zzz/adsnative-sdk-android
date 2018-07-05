@@ -16,7 +16,7 @@ public class ListViewFragment extends Fragment {
 
     private ANListAdapter mListAdapter;
 
-    private String AD_UNIT_ID = "NosADe7KvUy4b326YAeoGdVcIhxIwhKFAlje1GWv";
+    private String AD_UNIT_ID = "ping";
 
     @Override
     public View onCreateView(final LayoutInflater inflater,
