@@ -24,8 +24,7 @@ import java.net.URLEncoder;
 public class DFPNativeAd extends Fragment {
 
 
-//    private static final String DFP_AD_UNIT_ID = "/6499/example/native";
-    private static String DFP_AD_UNIT_ID = "/21666124832/pm_test";
+    private static final String DFP_AD_UNIT_ID = "/6499/example/native";
     private static final String SIMPLE_TEMPLATE_ID = "10104090";
 
 //    private static String PM_AD_UNIT_ID = "FbkE_RjFNgdb42BbWdIABOBCtJGoCqPv3FhZsPhd";
