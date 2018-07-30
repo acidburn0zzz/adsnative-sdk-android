@@ -24,15 +24,14 @@ import java.net.URLEncoder;
 public class DFPNativeAd extends Fragment {
 
 
-    private static final String DFP_AD_UNIT_ID = "/6499/example/native";
     private static final String SIMPLE_TEMPLATE_ID = "10104090";
-
-//    private static String PM_AD_UNIT_ID = "FbkE_RjFNgdb42BbWdIABOBCtJGoCqPv3FhZsPhd";
+        private static final String DFP_AD_UNIT_ID = "/6499/example/native";
+    //    private static String PM_AD_UNIT_ID = "FbkE_RjFNgdb42BbWdIABOBCtJGoCqPv3FhZsPhd";
     private static String PM_AD_UNIT_ID = "NosADe7KvUy4b326YAeoGdVcIhxIwhKFAlje1GWv";
 
     public void setAdUnitId(String AD_UNIT_ID) {
-        if(AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
-            ANLog.e("Placement id: "+AD_UNIT_ID);
+        if (AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
+            ANLog.e("Placement id: " + AD_UNIT_ID);
             this.PM_AD_UNIT_ID = URLEncoder.encode(AD_UNIT_ID);
         }
     }
@@ -45,7 +44,7 @@ public class DFPNativeAd extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_native_ad, container, false);
         final RelativeLayout nativeAdContainer = (RelativeLayout) view.findViewById(R.id.native_ad);
 
-        ANLog.e("DFP_AD_UNIT_ID: "+DFP_AD_UNIT_ID);
+        ANLog.e("DFP_AD_UNIT_ID: " + DFP_AD_UNIT_ID);
         AdLoader.Builder builder = new AdLoader.Builder(getContext(), DFP_AD_UNIT_ID);
 //        builder.forCustomTemplateAd(SIMPLE_TEMPLATE_ID,
 //                new NativeCustomTemplateAd.OnCustomTemplateAdLoadedListener() {
@@ -119,12 +118,12 @@ public class DFPNativeAd extends Fragment {
                 ((TextView) adView.getCallToActionView()).setText(nativeContentAd.getCallToAction());
                 ((TextView) adView.getAdvertiserView()).setText(nativeContentAd.getAdvertiser());
                 if (nativeContentAd.getImages() != null)
-                ((ImageView)adView.getImageView()).setImageDrawable(nativeContentAd.getImages().get(0).getDrawable());
-                ANLog.e("nativeContentAd.getImages().get(0): "+ nativeContentAd.getImages().get(0).getUri());
-                ANLog.e("nativeContentAd.getImages().get(0): "+ nativeContentAd.getImages().get(0).getScale());
-                ANLog.e("nativeContentAd.getImages().get(0): "+ nativeContentAd.getImages().get(0).getDrawable());
+                    ((ImageView) adView.getImageView()).setImageDrawable(nativeContentAd.getImages().get(0).getDrawable());
+                ANLog.e("nativeContentAd.getImages().get(0): " + nativeContentAd.getImages().get(0).getUri());
+                ANLog.e("nativeContentAd.getImages().get(0): " + nativeContentAd.getImages().get(0).getScale());
+                ANLog.e("nativeContentAd.getImages().get(0): " + nativeContentAd.getImages().get(0).getDrawable());
                 if (nativeContentAd.getLogo() != null) {
-                    ANLog.e("nativeContentAd.getLogo().getUri(): "+nativeContentAd.getLogo().getUri());
+                    ANLog.e("nativeContentAd.getLogo().getUri(): " + nativeContentAd.getLogo().getUri());
                     ((ImageView) adView.getLogoView()).setImageDrawable(nativeContentAd.getLogo().getDrawable());
                 }
                 adView.setNativeAd(nativeContentAd);
@@ -140,12 +139,12 @@ public class DFPNativeAd extends Fragment {
             }
         });
         AdLoader adLoader = builder.build();
-        PublisherAdRequest.Builder pubBuilder = new PublisherAdRequest.Builder();
-        pubBuilder.addCustomTargeting("key", "value").
-                setContentUrl("https://www.example.com");
+//        PublisherAdRequest.Builder pubBuilder = new PublisherAdRequest.Builder();
+//        pubBuilder.addCustomTargeting("key", "value").
+//                setContentUrl("https://www.example.com");
         PolymorphBidder pm_bidder = new PolymorphBidder(getContext());
-        pm_bidder.setBiddingInterval(0.05);
-        pm_bidder.setPubAdRequestBuilder(pubBuilder);
+        pm_bidder.setBiddingInterval(0.1);
+//        pm_bidder.setPubAdRequestBuilder(pubBuilder);
         pm_bidder.loadDFPAd(PM_AD_UNIT_ID, adLoader);
         return view;
     }

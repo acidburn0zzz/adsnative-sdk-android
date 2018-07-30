@@ -1,6 +1,8 @@
 package com.mopub.nativeads;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.view.View;
 
@@ -9,6 +11,7 @@ import com.adsnative.ads.ErrorCode;
 import com.adsnative.mediation.CustomAdNetwork;
 import com.adsnative.network.AdResponse;
 import com.adsnative.util.ANLog;
+import com.adsnative.util.Utils;
 import com.mopub.common.util.Drawables;
 
 import org.json.JSONArray;
@@ -164,10 +167,12 @@ public class MoPubAdNetwork extends CustomAdNetwork {
             final String mainImageUrl = getMainImage();
             if (mainImageUrl != null) {
                 imageUrls.add(mainImageUrl);
+                new ImageDrawableTask(mainImageUrl, null).execute();
             }
             final String iconUrl = getIconImage();
             if (iconUrl != null) {
                 imageUrls.add(iconUrl);
+                new ImageDrawableTask(null ,iconUrl).execute();
             }
 
             try {
@@ -236,7 +241,49 @@ public class MoPubAdNetwork extends CustomAdNetwork {
 
         @Override
         public void handleClick(final View view) {
+            if (mMopubClickHandler == null)
+                prepare(view);
             mMopubClickHandler.openClickDestinationUrl(mLandingURL, view);
+        }
+
+        private class ImageDrawableTask extends AsyncTask<String, Void, Boolean> {
+
+            private final String mainImageUrl;
+            private final String iconImageUrl;
+            private Drawable mainImageDrawable;
+            private Drawable iconImageDrawable;
+
+            public ImageDrawableTask(String mainImageUrl, String iconImageUrl) {
+                this.mainImageUrl = mainImageUrl;
+                this.iconImageUrl = iconImageUrl;
+            }
+
+            @Override
+            protected Boolean doInBackground(String... params) {
+                try {
+                    if (this.mainImageUrl != null && this.mainImageUrl.length() > 0 ) {
+                        this.mainImageDrawable = Utils.drawableFromUrl(mainImageUrl);
+                        return true;
+                    }
+                    if (this.iconImageUrl != null && this.iconImageUrl.length() > 0) {
+                        this.iconImageDrawable = Utils.drawableFromUrl(iconImageUrl);
+                        return true;
+                    }
+                } catch (Exception e) {
+                    ANLog.e("Couldn't convert image url to drawable: " + e.getMessage());
+                    ANLog.e("mainImageUrl: "+ this.mainImageUrl + ", iconImageUrl: "+ this.iconImageUrl);
+                }
+                return false;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean isDrawableCreated) {
+                super.onPostExecute(isDrawableCreated);
+                if (this.mainImageDrawable != null)
+                    setMainImageDrawable(this.mainImageDrawable);
+                if (this.iconImageDrawable != null)
+                    setIconImageDrawable(this.iconImageDrawable);
+            }
         }
     }
 }

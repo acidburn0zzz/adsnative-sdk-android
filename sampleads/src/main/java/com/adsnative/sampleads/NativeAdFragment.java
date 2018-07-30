@@ -13,11 +13,20 @@ import com.adsnative.ads.ANNativeAd;
 import com.adsnative.ads.NativeAdUnit;
 import com.adsnative.util.ANLog;
 
+import java.net.URLEncoder;
+
 public class NativeAdFragment extends Fragment {
 
     private ANNativeAd mNativeAd;
 
     private String AD_UNIT_ID = "ping";
+
+    public void setAdUnitId(String AD_UNIT_ID) {
+        if(AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
+            ANLog.e("Placement id: "+AD_UNIT_ID);
+            this.AD_UNIT_ID = URLEncoder.encode(AD_UNIT_ID);
+        }
+    }
 
     @Override
     public View onCreateView(final LayoutInflater inflater,

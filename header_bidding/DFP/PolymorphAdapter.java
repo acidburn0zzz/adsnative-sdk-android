@@ -13,10 +13,10 @@ import com.adsnative.util.ANLog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.ads.mediation.NativeAppInstallAdMapper;
+import com.google.android.gms.ads.mediation.NativeContentAdMapper;
 import com.google.android.gms.ads.mediation.NativeMediationAdRequest;
 import com.google.android.gms.ads.mediation.customevent.CustomEventNative;
 import com.google.android.gms.ads.mediation.customevent.CustomEventNativeListener;
-import com.google.android.gms.ads.mediation.NativeContentAdMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +25,16 @@ import java.util.List;
  * Created by sijojohn on 12/06/18.
  */
 
-public class PolymorphAdapter implements CustomEventNative{
+public class PolymorphAdapter implements CustomEventNative {
 
     @Override
     public void requestNativeAd(Context context, CustomEventNativeListener customEventNativeListener, String parameters, NativeMediationAdRequest nativeMediationAdRequest, Bundle bundle) {
         NativeAdUnit nativeAdUnit;
         // check if there's a cached PM ad
         if (PrefetchAds.getSize() > 0 && ((nativeAdUnit = PrefetchAds.getAd()) != null)) {
-                final PolymorphStaticNativeAd polymorphStaticNativeAd = new PolymorphStaticNativeAd(
-                        context, nativeAdUnit, customEventNativeListener, nativeMediationAdRequest);
-                polymorphStaticNativeAd.loadAd();
+            final PolymorphStaticNativeAd polymorphStaticNativeAd = new PolymorphStaticNativeAd(
+                    context, nativeAdUnit, customEventNativeListener, nativeMediationAdRequest);
+            polymorphStaticNativeAd.loadAd();
 
         } else {
             ANLog.e("Couldn't find Prefetched ads");
@@ -136,6 +136,7 @@ public class PolymorphAdapter implements CustomEventNative{
             mNativeAdUnit.handleClick(view);
         }
     }
+
     static class PMNativeAppInstallAdMapper extends NativeAppInstallAdMapper {
         private NativeAdUnit mNativeAdUnit;
 
