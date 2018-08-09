@@ -37,7 +37,8 @@ public class PolymorphAdapter implements CustomEventNative {
             polymorphStaticNativeAd.loadAd();
 
         } else {
-            ANLog.e("Couldn't find Prefetched ads");
+            ANLog.d("Couldn't find Prefetched Native ad");
+            customEventNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
         }
     }
 
@@ -81,7 +82,7 @@ public class PolymorphAdapter implements CustomEventNative {
             if (mNativeMediationRequest.isContentAdRequested()) {
                 mCustomEventNativeListener.onAdLoaded(new PMNativeContentAdMapper(nativeAdUnit));
             } else {
-                if (nativeAdUnit.getCallToAction() != null) {
+                if ((nativeAdUnit.getCallToAction() != null) && (nativeAdUnit.getIconImage() != null)) {
                     mCustomEventNativeListener.onAdLoaded(new PMNativeAppInstallAdMapper(nativeAdUnit));
                 } else {
                     this.onAdFailed("Couldn't find app install ad");

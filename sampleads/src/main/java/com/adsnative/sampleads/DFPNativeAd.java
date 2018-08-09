@@ -10,14 +10,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.adsnative.ads.AdHelper;
 import com.adsnative.header_bidding.DFP.PolymorphBidder;
 import com.adsnative.util.ANLog;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.doubleclick.PublisherAdView;
 import com.google.android.gms.ads.formats.MediaView;
 import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.ads.formats.NativeContentAdView;
+import com.google.android.gms.ads.formats.OnPublisherAdViewLoadedListener;
 
 import java.net.URLEncoder;
 
@@ -25,9 +28,9 @@ public class DFPNativeAd extends Fragment {
 
 
     private static final String SIMPLE_TEMPLATE_ID = "10104090";
-        private static final String DFP_AD_UNIT_ID = "/6499/example/native";
+    private static final String DFP_AD_UNIT_ID = "/6499/example/native";
     //    private static String PM_AD_UNIT_ID = "FbkE_RjFNgdb42BbWdIABOBCtJGoCqPv3FhZsPhd";
-    private static String PM_AD_UNIT_ID = "NosADe7KvUy4b326YAeoGdVcIhxIwhKFAlje1GWv";
+    private static String PM_AD_UNIT_ID = "FvfkqOJvMC-y37a7WwDMJVNhgs1cWlHX24NsPFy9";
 
     public void setAdUnitId(String AD_UNIT_ID) {
         if (AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
@@ -130,7 +133,13 @@ public class DFPNativeAd extends Fragment {
                 nativeAdContainer.addView(adView);
             }
         });
-
+        builder.forPublisherAdView(new OnPublisherAdViewLoadedListener() {
+            @Override
+            public void onPublisherAdViewLoaded(PublisherAdView publisherAdView) {
+                nativeAdContainer.removeAllViews();
+                nativeAdContainer.addView(publisherAdView);
+            }
+        }, AdSize.BANNER);
         builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(int errorCode) {
@@ -142,10 +151,14 @@ public class DFPNativeAd extends Fragment {
 //        PublisherAdRequest.Builder pubBuilder = new PublisherAdRequest.Builder();
 //        pubBuilder.addCustomTargeting("key", "value").
 //                setContentUrl("https://www.example.com");
-        PolymorphBidder pm_bidder = new PolymorphBidder(getContext());
-        pm_bidder.setBiddingInterval(0.1);
+        /* Native Request */
+//        PolymorphBidder pm_bidder = new PolymorphBidder(getContext(), PM_AD_UNIT_ID, adLoader);
+        /* Native-Banner request (needs banner size also) */
+        PolymorphBidder pm_bidder = new PolymorphBidder(getContext(), PM_AD_UNIT_ID, adLoader, AdHelper.AdSize.BANNER_300x50);
+//        pm_bidder.setBiddingInterval(0.05);
 //        pm_bidder.setPubAdRequestBuilder(pubBuilder);
-        pm_bidder.loadDFPAd(PM_AD_UNIT_ID, adLoader);
+//        pm_bidder.setBannerSize(AdHelper.AdSize.BANNER_300x50);
+        pm_bidder.loadDFPAd();
         return view;
     }
 

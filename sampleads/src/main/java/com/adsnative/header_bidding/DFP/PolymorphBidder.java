@@ -1,15 +1,13 @@
 package com.adsnative.header_bidding.DFP;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.adsnative.ads.ANAdListener;
-import com.adsnative.ads.PMBannerAdListener;
-import com.adsnative.ads.PMBannerView;
-import com.adsnative.ads.ANNativeAd;
 import com.adsnative.ads.ANRequestParameters;
 import com.adsnative.ads.AdHelper;
 import com.adsnative.ads.NativeAdUnit;
+import com.adsnative.ads.PMBannerAdListener;
+import com.adsnative.ads.PMBannerView;
 import com.adsnative.ads.PMUnifiedAd;
 import com.adsnative.ads.PrefetchAds;
 import com.adsnative.util.ANLog;
@@ -34,9 +32,40 @@ public class PolymorphBidder {
     private Builder pubBuilder;
     private int bannerWidth = 0;
     private int bannerHeight = 0;
+    private String PMplacementId;
+    private AdLoader adLoader;
+    private PublisherAdView pubAdView;
+    private PMUnifiedAd PMunifiedAd;
+    private String requestType;
 
-    public PolymorphBidder(Context context) {
+    // Native and Banner ads
+    public PolymorphBidder(Context context, String pmPlacementId, AdLoader adLoader, AdHelper.AdSize adSize) {
         this.mContext = context;
+        this.bannerHeight = adSize.getHeight();
+        this.bannerWidth = adSize.getWidth();
+        this.PMplacementId = pmPlacementId;
+        this.adLoader = adLoader;
+        this.PMunifiedAd = new PMUnifiedAd(this.mContext, this.PMplacementId, AdHelper.AdTypes.AD_TYPE_ALL);
+        this.PMunifiedAd.setBannerSize(this.bannerWidth, this.bannerHeight);
+        requestType = AdHelper.AdTypes.AD_TYPE_ALL.toString();
+    }
+
+    // Only native ads
+    public PolymorphBidder(Context context, String pmPlacementId, AdLoader adLoader) {
+        this.mContext = context;
+        this.PMplacementId = pmPlacementId;
+        this.adLoader = adLoader;
+        this.PMunifiedAd = new PMUnifiedAd(this.mContext, this.PMplacementId, AdHelper.AdTypes.AD_TYPE_NATIVE);
+        requestType = AdHelper.AdTypes.AD_TYPE_NATIVE.toString();
+    }
+
+    // Only banner ads
+    public PolymorphBidder(Context context, String pmPlacementId, PublisherAdView pubAdView) {
+        this.mContext = context;
+        this.PMplacementId = pmPlacementId;
+        this.pubAdView = pubAdView;
+        this.PMunifiedAd = new PMUnifiedAd(this.mContext, this.PMplacementId, AdHelper.AdTypes.AD_TYPE_BANNER);
+        requestType = AdHelper.AdTypes.AD_TYPE_BANNER.toString();
     }
 
     public void setBiddingInterval(Double biddingInterval) {
@@ -47,16 +76,28 @@ public class PolymorphBidder {
         this.pubBuilder = pubBuilder;
     }
 
-    public void loadDFPAd(@NonNull final String pmPlacementId, @NonNull final AdLoader adLoader) {
+    public void loadDFPAd() {
+        if (requestType.equalsIgnoreCase(AdHelper.AdTypes.AD_TYPE_ALL.toString())) {
+            loadDFPUnifiedAd();
+        }
+        if (requestType.equalsIgnoreCase(AdHelper.AdTypes.AD_TYPE_BANNER.toString())) {
+            loadDFPBannerAd();
+        }
+        if (requestType.equalsIgnoreCase(AdHelper.AdTypes.AD_TYPE_NATIVE.toString())) {
+            loadDFPNativeAd();
+        }
+    }
+
+    // DFP Native Ads
+    private void loadDFPNativeAd() {
         if (pubBuilder == null) {
             pubBuilder = new PublisherAdRequest.Builder();
         }
         List<String> keywords = new ArrayList<String>();
         keywords.add("&hb=1");
         ANRequestParameters requestParameters = new ANRequestParameters.Builder().keywords(keywords).build();
-        ANNativeAd anNativeAd = new ANNativeAd(this.mContext, pmPlacementId);
 
-        anNativeAd.setNativeAdListener(new ANAdListener() {
+        PMunifiedAd.setNativeAdListener(new ANAdListener() {
             @Override
             public void onAdLoaded(NativeAdUnit nativeAdUnit) {
                 if (PrefetchAds.getSize() > 0) {
@@ -102,10 +143,11 @@ public class PolymorphBidder {
                 return false;
             }
         });
-        anNativeAd.loadAd(requestParameters);
+        PMunifiedAd.loadAd(requestParameters);
     }
 
-    public void loadDFPBannerAd(@NonNull final String pmPlacementId, @NonNull final PublisherAdView pubAdView) {
+    // DFP Banner Ads
+    private void loadDFPBannerAd() {
         if (pubBuilder == null) {
             pubBuilder = new PublisherAdRequest.Builder();
         }
@@ -119,9 +161,8 @@ public class PolymorphBidder {
             bannerWidth = pubAdView.getAdSize().getWidth();
             bannerHeight = pubAdView.getAdSize().getHeight();
         }
-        PMUnifiedAd pmUnifiedAd = new PMUnifiedAd(this.mContext, pmPlacementId, AdHelper.AdTypes.AD_TYPE_BANNER);
-        pmUnifiedAd.setBannerSize(bannerWidth, bannerHeight);
-        pmUnifiedAd.setBannerAdListener(new PMBannerAdListener() {
+        PMunifiedAd.setBannerSize(bannerWidth, bannerHeight);
+        PMunifiedAd.setBannerAdListener(new PMBannerAdListener() {
             @Override
             public void onBannerAdLoaded(PMBannerView bannerView) {
                 if (PrefetchAds.getBannerSize() > 0) {
@@ -159,6 +200,107 @@ public class PolymorphBidder {
                 pubAdView.loadAd(pubBuilder.build());
             }
         });
-        pmUnifiedAd.loadAd(requestParameters);
+        PMunifiedAd.loadAd(requestParameters);
+    }
+
+    // DFP Native and Banner Ads
+    private void loadDFPUnifiedAd() {
+        if (pubBuilder == null) {
+            pubBuilder = new PublisherAdRequest.Builder();
+        }
+        List<String> keywords = new ArrayList<String>();
+        keywords.add("&hb=1");
+        ANRequestParameters requestParameters = new ANRequestParameters.Builder().keywords(keywords).build();
+
+        PMunifiedAd.setBannerSize(bannerWidth, bannerHeight);
+        PMunifiedAd.setBannerAdListener(new PMBannerAdListener() {
+            @Override
+            public void onBannerAdLoaded(PMBannerView bannerView) {
+                if (PrefetchAds.getBannerSize() > 0) {
+                    PrefetchAds.getBannerAd(); // clear cache
+                }
+                PrefetchAds.setBannerAd(bannerView);
+                Double ecpm = bannerView.getEcpm();
+
+                // get bidding interval from server
+                if (bannerView.getBiddingInterval() != null) {
+                    biddingInterval = bannerView.getBiddingInterval();
+                }
+                ANLog.d("biddingInterval: " + biddingInterval);
+                Double roundedEcpm = Utils.roundEcpm(ecpm, biddingInterval);
+
+                if (roundedEcpm != null) {
+                    String bidPrice = String.format("%.2f", roundedEcpm);
+                    PublisherAdRequest newRequest = pubBuilder
+                            .addCustomTargeting("ecpm", bidPrice)
+                            .build();
+                    ANLog.d("passing ecpm of " + bidPrice);
+                    adLoader.loadAd(newRequest);
+                } else {
+                    adLoader.loadAd(pubBuilder.build());
+                }
+            }
+
+            @Override
+            public void onBannerAdClicked(PMBannerView bannerView) {
+                ANLog.d("PM banner clicked");
+            }
+
+            @Override
+            public void onBannerAdFailed(String message) {
+                adLoader.loadAd(pubBuilder.build());
+            }
+        });
+        PMunifiedAd.setNativeAdListener(new ANAdListener() {
+            @Override
+            public void onAdLoaded(NativeAdUnit nativeAdUnit) {
+                if (PrefetchAds.getSize() > 0) {
+                    PrefetchAds.getAd(); // clear cache
+                }
+                PrefetchAds.setAd(nativeAdUnit);
+                Double ecpm = nativeAdUnit.getEcpm();
+
+                // get bidding interval from server
+                if (nativeAdUnit.getBiddingInterval() != null) {
+                    biddingInterval = nativeAdUnit.getBiddingInterval();
+                }
+                ANLog.d("biddingInterval: " + biddingInterval);
+                Double roundedEcpm = Utils.roundEcpm(ecpm, biddingInterval);
+
+                if (roundedEcpm != null) {
+                    String bidPrice = String.format("%.2f", roundedEcpm);
+
+                    ANLog.d("passing ecpm of" + " " + bidPrice);
+                    PublisherAdRequest newRequest = pubBuilder
+                            .addCustomTargeting("ecpm", bidPrice)
+                            .build();
+                    adLoader.loadAd(newRequest);
+                } else {
+                    adLoader.loadAd(pubBuilder.build());
+                }
+            }
+
+            @Override
+            public void onAdFailed(String message) {
+                adLoader.loadAd(pubBuilder.build());
+            }
+
+            @Override
+            public void onAdImpressionRecorded() {
+
+            }
+
+            @Override
+            public boolean onAdClicked(NativeAdUnit nativeAdUnit) {
+                return false;
+            }
+        });
+        PMunifiedAd.loadAd(requestParameters);
+
+    }
+
+    public void setBannerSize(AdHelper.AdSize bannerSize) {
+        this.bannerWidth = bannerSize.getWidth();
+        this.bannerHeight = bannerSize.getHeight();
     }
 }

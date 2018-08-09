@@ -29,7 +29,8 @@ public class PolymorphBannerAdapter implements CustomEventBanner {
             polymorphStaticNativeAd.loadAd();
 
         } else {
-            ANLog.d("Couldn't find Prefetched ads. Making a fresh request to PM");
+            ANLog.d("Couldn't find Prefetched Banner ad");
+            customEventBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
         }
     }
 
