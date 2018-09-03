@@ -5,9 +5,9 @@
 4. Allow opening landing urls with redirects in PM sdk
 
 ## v3.0.0
-1.Added support for Banner ads
-2.Added support for DFP Banner In-App client server bidding
-3.Updated Mopub bidder file for In-App client server bidding
+1. Added support for Banner ads
+2. Added support for DFP Banner In-App client server bidding
+3. Updated Mopub bidder file for In-App client server bidding
 
 ## v2.7.0
 1. Added support for DFP client server bidding
