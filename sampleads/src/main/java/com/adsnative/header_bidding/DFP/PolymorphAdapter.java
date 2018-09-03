@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.adsnative.ads.ANAdListener;
 import com.adsnative.ads.NativeAdUnit;
@@ -20,6 +21,7 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventNativeListene
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sijojohn on 12/06/18.
@@ -57,7 +59,7 @@ public class PolymorphAdapter implements CustomEventNative {
 
     }
 
-    static class PolymorphStaticNativeAd implements ANAdListener {
+    static class PolymorphStaticNativeAd {
 
         private Context mContext;
         private NativeAdUnit mNativeAd;
@@ -77,95 +79,190 @@ public class PolymorphAdapter implements CustomEventNative {
             this.onAdLoaded(mNativeAd);
         }
 
-        @Override
         public void onAdLoaded(NativeAdUnit nativeAdUnit) {
-            if (mNativeMediationRequest.isContentAdRequested()) {
-                mCustomEventNativeListener.onAdLoaded(new PMNativeContentAdMapper(nativeAdUnit));
+            if (nativeAdUnit.getCallToAction() != null && !nativeAdUnit.getCallToAction().isEmpty()
+                    && (nativeAdUnit.getIconImage() != null || nativeAdUnit.getType().equalsIgnoreCase("facebook"))) {
+                mCustomEventNativeListener.onAdLoaded(new PMNativeAppInstallAdMapper(nativeAdUnit, mCustomEventNativeListener, mContext));
             } else {
-                if ((nativeAdUnit.getCallToAction() != null) && (nativeAdUnit.getIconImage() != null)) {
-                    mCustomEventNativeListener.onAdLoaded(new PMNativeAppInstallAdMapper(nativeAdUnit));
-                } else {
-                    this.onAdFailed("Couldn't find app install ad");
-                }
+                mCustomEventNativeListener.onAdLoaded(new PMNativeContentAdMapper(nativeAdUnit, mCustomEventNativeListener, mContext));
             }
         }
 
-        @Override
         public void onAdFailed(String message) {
             ANLog.e(message);
             mCustomEventNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
         }
 
-        @Override
-        public void onAdImpressionRecorded() {
-        }
-
-        @Override
-        public boolean onAdClicked(NativeAdUnit nativeAdUnit) {
-            return false;
-        }
     }
 
     static class PMNativeContentAdMapper extends NativeContentAdMapper {
         private NativeAdUnit mNativeAdUnit;
 
-        // Mapping PM ad assets to DFP
-        PMNativeContentAdMapper(NativeAdUnit nativeAdUnit) {
+        PMNativeContentAdMapper(NativeAdUnit nativeAdUnit, final CustomEventNativeListener mCustomEventNativeListener, Context mContext) {
+            nativeAdUnit.setPubCallbacksListener(new ANAdListener() {
+                @Override
+                public void onAdLoaded(NativeAdUnit nativeAdUnit) {
+
+                }
+
+                @Override
+                public void onAdFailed(String message) {
+
+                }
+
+                @Override
+                public void onAdImpressionRecorded() {
+                    if (getOverrideImpressionRecording()) {
+                        ANLog.d("Firing DFP impression tracker");
+                        mCustomEventNativeListener.onAdImpression();
+                    }
+                }
+
+                @Override
+                public boolean onAdClicked(NativeAdUnit nativeAdUnit) {
+                    if (getOverrideClickHandling()) {
+                        ANLog.d("Firing DFP click tracker");
+                        mCustomEventNativeListener.onAdClicked();
+                    }
+                    return false;
+                }
+            });
+            // Mapping PM ad assets to DFP
             mNativeAdUnit = nativeAdUnit;
             setHeadline(mNativeAdUnit.getTitle());
             setBody(mNativeAdUnit.getSummary());
             setAdvertiser(mNativeAdUnit.getPromotedBy());
             setCallToAction(mNativeAdUnit.getCallToAction());
+
             // mapping image assets using NativeMappedImage
-            setLogo(new NativeMappedImage(mNativeAdUnit.getIconImageDrawable(), Uri.parse(mNativeAdUnit.getIconImage()), 1.0));
+            if (mNativeAdUnit.getIconImage() != null)
+                setLogo(new NativeMappedImage(mNativeAdUnit.getIconImageDrawable(), Uri.parse(mNativeAdUnit.getIconImage()), 1.0));
             List imagesList = new ArrayList();
-            imagesList.add(new NativeMappedImage(mNativeAdUnit.getMainImageDrawable(), Uri.parse(mNativeAdUnit.getMainImage()), 1.0));
-            setImages(imagesList);
+
+            if (mNativeAdUnit.getMainImage() != null)
+                imagesList.add(new NativeMappedImage(mNativeAdUnit.getMainImageDrawable(), Uri.parse(mNativeAdUnit.getMainImage()), 1.0));
+            if (imagesList.size() > 0)
+                setImages(imagesList);
+            if (mNativeAdUnit.getMediaView() != null) {
+                setOverrideClickHandling(true);
+                setOverrideImpressionRecording(true);
+                setMediaView(mNativeAdUnit.getMediaView());
+                setHasVideoContent(true);
+            }
+            if (mNativeAdUnit.getAdChoicesView() != null)
+                setAdChoicesContent(mNativeAdUnit.getAdChoicesView());
+            else if (mNativeAdUnit.getAdChoicesIcon() != null && mNativeAdUnit.getAdChoicesClickThroughUrl() != null) {
+                ImageView adchoicesView = new ImageView(mContext);
+                nativeAdUnit.loadAdChoicesImage(adchoicesView);
+                setAdChoicesContent(adchoicesView);
+            }
+        }
+
+        @Override
+        public void trackViews(View view, Map<String, View> map, Map<String, View> map1) {
+            if (getOverrideClickHandling())
+                mNativeAdUnit.prepare(view);
         }
 
         @Override
         public void recordImpression() {
-            ANLog.d("Firing PM impression tracker");
-            super.recordImpression();
-            mNativeAdUnit.recordImpression(null);
+            if (!getOverrideImpressionRecording()) {
+                ANLog.d("Firing PM impression tracker");
+                mNativeAdUnit.recordImpression(null);
+            }
         }
 
         @Override
         public void handleClick(View view) {
-            ANLog.d("Handling PM click");
-            super.handleClick(view);
-            mNativeAdUnit.handleClick(view);
+            if (!getOverrideClickHandling()) {
+                ANLog.d("Handling PM click");
+                mNativeAdUnit.handleClick(view);
+            }
         }
     }
 
     static class PMNativeAppInstallAdMapper extends NativeAppInstallAdMapper {
         private NativeAdUnit mNativeAdUnit;
 
-        // Mapping PM ad assets to DFP
-        PMNativeAppInstallAdMapper(NativeAdUnit nativeAdUnit) {
+        PMNativeAppInstallAdMapper(NativeAdUnit nativeAdUnit, final CustomEventNativeListener mCustomEventNativeListener, Context mContext) {
+            nativeAdUnit.setPubCallbacksListener(new ANAdListener() {
+                @Override
+                public void onAdLoaded(NativeAdUnit nativeAdUnit) {
+
+                }
+
+                @Override
+                public void onAdFailed(String message) {
+
+                }
+
+                @Override
+                public void onAdImpressionRecorded() {
+                    if (getOverrideImpressionRecording()) {
+                        ANLog.d("Firing DFP impression tracker");
+                        mCustomEventNativeListener.onAdImpression();
+                    }
+                }
+
+                @Override
+                public boolean onAdClicked(NativeAdUnit nativeAdUnit) {
+                    if (getOverrideClickHandling()) {
+                        ANLog.d("Firing DFP click tracker");
+                        mCustomEventNativeListener.onAdClicked();
+                    }
+                    return false;
+                }
+            });
+            // Mapping PM ad assets to DFP
             mNativeAdUnit = nativeAdUnit;
             setHeadline(mNativeAdUnit.getTitle());
             setBody(mNativeAdUnit.getSummary());
             setCallToAction(mNativeAdUnit.getCallToAction());
+
             // mapping image assets using NativeMappedImage
-            setIcon(new NativeMappedImage(mNativeAdUnit.getIconImageDrawable(), Uri.parse(mNativeAdUnit.getIconImage()), 1.0));
+            if (mNativeAdUnit.getIconImage() != null)
+                setIcon(new NativeMappedImage(mNativeAdUnit.getIconImageDrawable(), Uri.parse(mNativeAdUnit.getIconImage()), 1.0));
             List imagesList = new ArrayList();
-            imagesList.add(new NativeMappedImage(mNativeAdUnit.getMainImageDrawable(), Uri.parse(mNativeAdUnit.getMainImage()), 1.0));
-            setImages(imagesList);
+            if (mNativeAdUnit.getMainImage() != null)
+                imagesList.add(new NativeMappedImage(mNativeAdUnit.getMainImageDrawable(), Uri.parse(mNativeAdUnit.getMainImage()), 1.0));
+            if (imagesList.size() > 0)
+                setImages(imagesList);
+            if (mNativeAdUnit.getMediaView() != null) {
+                setOverrideClickHandling(true);
+                setOverrideImpressionRecording(true);
+                setMediaView(mNativeAdUnit.getMediaView());
+                setHasVideoContent(true);
+            }
+            if (mNativeAdUnit.getAdChoicesView() != null)
+                setAdChoicesContent(mNativeAdUnit.getAdChoicesView());
+            else if (mNativeAdUnit.getAdChoicesIcon() != null && mNativeAdUnit.getAdChoicesClickThroughUrl() != null) {
+                ImageView adchoicesView = new ImageView(mContext);
+                nativeAdUnit.loadAdChoicesImage(adchoicesView);
+                setAdChoicesContent(adchoicesView);
+            }
+        }
+
+        @Override
+        public void trackViews(View view, Map<String, View> map, Map<String, View> map1) {
+            if (getOverrideClickHandling()) {
+                mNativeAdUnit.prepare(view);
+            }
         }
 
         @Override
         public void recordImpression() {
-            ANLog.d("Firing PM impression tracker");
-            super.recordImpression();
-            mNativeAdUnit.recordImpression(null);
+            if (!getOverrideImpressionRecording()) {
+                ANLog.d("Firing PM impression tracker");
+                mNativeAdUnit.recordImpression(null);
+            }
         }
 
         @Override
         public void handleClick(View view) {
-            ANLog.d("Handling PM click");
-            super.handleClick(view);
-            mNativeAdUnit.handleClick(view);
+            if (!getOverrideClickHandling()) {
+                ANLog.d("Handling PM click");
+                mNativeAdUnit.handleClick(view);
+            }
         }
     }
 

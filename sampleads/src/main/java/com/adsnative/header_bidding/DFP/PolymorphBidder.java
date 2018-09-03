@@ -38,7 +38,14 @@ public class PolymorphBidder {
     private PMUnifiedAd PMunifiedAd;
     private String requestType;
 
-    // Native and Banner ads
+    /**
+     * To be used for requesting both Native and Banner ads
+     *
+     * @param context Application context
+     * @param pmPlacementId Polymorph placement ID
+     * @param adLoader DFP AdLoader object
+     * @param adSize Banner ad size
+     */
     public PolymorphBidder(Context context, String pmPlacementId, AdLoader adLoader, AdHelper.AdSize adSize) {
         this.mContext = context;
         this.bannerHeight = adSize.getHeight();
@@ -50,7 +57,13 @@ public class PolymorphBidder {
         requestType = AdHelper.AdTypes.AD_TYPE_ALL.toString();
     }
 
-    // Only native ads
+    /**
+     * To be used for requesting only Native ads
+     *
+     * @param context Application context
+     * @param pmPlacementId Polymorph placement ID
+     * @param adLoader DFP AdLoader object
+     */
     public PolymorphBidder(Context context, String pmPlacementId, AdLoader adLoader) {
         this.mContext = context;
         this.PMplacementId = pmPlacementId;
@@ -59,7 +72,13 @@ public class PolymorphBidder {
         requestType = AdHelper.AdTypes.AD_TYPE_NATIVE.toString();
     }
 
-    // Only banner ads
+    /**
+     * To be used for requesting only Banner ads
+     *
+     * @param context Application context
+     * @param pmPlacementId Polymorph placement ID
+     * @param pubAdView DFP PublisherAdView object
+     */
     public PolymorphBidder(Context context, String pmPlacementId, PublisherAdView pubAdView) {
         this.mContext = context;
         this.PMplacementId = pmPlacementId;
@@ -287,7 +306,6 @@ public class PolymorphBidder {
 
             @Override
             public void onAdImpressionRecorded() {
-
             }
 
             @Override

@@ -53,11 +53,9 @@
                     android:id="@+id/contentad_call_to_action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:textColor="#0000FF"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:gravity="center"
+                    android:text="learn more"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -91,6 +89,7 @@
 
                     <ImageView
                         android:id="@+id/contentad_logo"
+                        android:tag="icon"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:layout_marginRight="8dp"

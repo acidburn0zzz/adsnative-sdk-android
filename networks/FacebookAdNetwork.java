@@ -2,30 +2,26 @@ package com.adsnative.mediation;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.adsnative.ads.BaseNativeAd;
 import com.adsnative.ads.ErrorCode;
 import com.adsnative.network.AdResponse;
 import com.adsnative.util.ANLog;
-
 import com.facebook.ads.Ad;
+import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.AdError;
-import com.facebook.ads.AdListener;
+import com.facebook.ads.AdIconView;
 import com.facebook.ads.AdSettings;
-import com.facebook.ads.ImpressionListener;
 import com.facebook.ads.MediaView;
 import com.facebook.ads.NativeAd;
-import com.facebook.ads.NativeAd.Rating;
+import com.facebook.ads.NativeAdListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Created by sreekanth on 17/09/15.
+ * Created by sijojohn on 03/08/18.
  */
 public class FacebookAdNetwork extends CustomAdNetwork {
     private static final String PLACEMENT_ID_KEY = "placementId";
@@ -46,7 +42,6 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         try {
             if (customAdNetworkData != null) {
                 placementId = customAdNetworkData.getString(PLACEMENT_ID_KEY);
-//            placementId = "202991423187328_724667197686412";
                 ANLog.d("FacebookAdNetwork: " + placementId);
             } else {
                 ANLog.e("Attempted to invoke getString on null customAdNetworkData");
@@ -73,17 +68,18 @@ public class FacebookAdNetwork extends CustomAdNetwork {
             } else {
                 ANLog.e("Attempted to invoke loadAd on null facebookNativeAd");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    static class FacebookNativeAd extends BaseNativeAd implements AdListener, ImpressionListener {
+    static class FacebookNativeAd extends BaseNativeAd implements NativeAdListener {
         private static final String SOCIAL_CONTEXT_FOR_AD = "socialContextForAd";
 
         private final Context mContext;
         private final NativeAd mFbNativeAd;
         private final CustomEventListener mCustomEventListener;
+        private MediaView fbMediaView;
 
         FacebookNativeAd(final Context context,
                          final NativeAd nativeAd,
@@ -95,11 +91,9 @@ public class FacebookAdNetwork extends CustomAdNetwork {
 
         void loadAd() {
             // for testing purpose only
-//            AdSettings.addTestDevice("8d98c3d2ec70e7d185403ed007386f12");
-            // for testing purpose only
+//            AdSettings.addTestDevice("0cdf374f83fda2c592ff2fd20109576b");
             if (mFbNativeAd != null) {
                 mFbNativeAd.setAdListener(this);
-                mFbNativeAd.setImpressionListener(this);
                 mFbNativeAd.loadAd();
             } else {
                 ANLog.e("mFbNativeAd is null");
@@ -123,58 +117,24 @@ public class FacebookAdNetwork extends CustomAdNetwork {
 
             setProviderName(FacebookAdNetwork.class.getName());
 
-            setTitle(mFbNativeAd.getAdTitle());
-            setSummary(mFbNativeAd.getAdBody());
-
-            NativeAd.Image coverImage = mFbNativeAd.getAdCoverImage();
-            setMainImage(coverImage == null ? null : coverImage.getUrl());
-
-            NativeAd.Image icon = mFbNativeAd.getAdIcon();
-            setIconImage(icon == null ? null : icon.getUrl());
-
+            setTitle(mFbNativeAd.getAdHeadline());
+            mFbNativeAd.getAdChoicesIcon();
+            setSummary(mFbNativeAd.getAdBodyText());
             setCallToAction(mFbNativeAd.getAdCallToAction());
-            setStarRating(getDoubleRating(mFbNativeAd.getAdStarRating()));
 
-            NativeAd.Image adChoices = mFbNativeAd.getAdChoicesIcon();
-            setAdChoicesIcon(adChoices == null ? null : adChoices.getUrl());
+            String adChoices = mFbNativeAd.getAdChoicesImageUrl();
+            setAdChoicesIcon(adChoices);
             setAdChoicesClickThroughUrl(mFbNativeAd.getAdChoicesLinkUrl());
-
             setPromotedByTag("Sponsored");
-
             setType("facebook");
-            MediaView fbMediaView = new MediaView(mContext);
-            fbMediaView.setNativeAd(mFbNativeAd);
+            fbMediaView = new MediaView(mContext);
+            AdChoicesView adChoicesView = new AdChoicesView(mContext, mFbNativeAd, true);
+            setAdChoicesView(adChoicesView);
             setMediaView(fbMediaView);
 
             addCustomField(SOCIAL_CONTEXT_FOR_AD, mFbNativeAd.getAdSocialContext());
 
-            final List<String> imageUrls = new ArrayList<String>();
-            final String mainImageUrl = getMainImage();
-            if (mainImageUrl != null) {
-                imageUrls.add(mainImageUrl);
-            }
-            final String iconUrl = getIconImage();
-            if (iconUrl != null) {
-                imageUrls.add(iconUrl);
-            }
-
-            try {
-                preCacheImages(mContext, imageUrls, new ImageListener() {
-                    @Override
-                    public void onImagesCached() {
-                        mCustomEventListener.onNativeAdLoaded(FacebookNativeAd.this);
-                    }
-
-                    @Override
-                    public void onImagesFailedToCache(ErrorCode errorCode) {
-                        ANLog.e("FacebookAdNetwork: " + errorCode);
-                        mCustomEventListener.onNativeAdLoaded(FacebookNativeAd.this);
-                        // mCustomEventListener.onNativeAdFailed(errorCode);
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mCustomEventListener.onNativeAdLoaded(FacebookNativeAd.this);
         }
 
         @Override
@@ -211,7 +171,26 @@ public class FacebookAdNetwork extends CustomAdNetwork {
         @Override
         public void prepare(final View view) {
             if (mFbNativeAd != null) {
-                mFbNativeAd.registerViewForInteraction(view);
+                /* IMPORTANT */
+                /* Fb mandates icon image for native ads */
+                /* publisher needs to add a tag "icon" for icon imageview element */
+                final View icon = view.findViewWithTag("icon");
+                if (icon != null) {
+                    try {
+                        final LinearLayout parent = (LinearLayout) icon.getParent();
+                        parent.removeView(icon);
+                        AdIconView adIconView = new AdIconView(mContext);
+                        parent.addView(adIconView, icon.getLayoutParams().width, icon.getLayoutParams().height);
+                        parent.requestLayout();
+                        mFbNativeAd.registerViewForInteraction(view, fbMediaView, adIconView);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    ANLog.e("FbAdNetwork: couldn't find icon imageview in layout!");
+                    mFbNativeAd.registerViewForInteraction(view, fbMediaView);
+                }
+
                 setOverridingClickTracker(true);
                 setOverridingImpressionTracker(true);
             } else {
@@ -237,12 +216,10 @@ public class FacebookAdNetwork extends CustomAdNetwork {
             }
         }
 
-        private Double getDoubleRating(final Rating rating) {
-            if (rating == null) {
-                return null;
-            }
+        @Override
+        public void onMediaDownloaded(Ad ad) {
 
-            return MAX_STAR_RATING * rating.getValue() / rating.getScale();
         }
+
     }
 }
