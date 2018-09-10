@@ -29,7 +29,8 @@ public class BannerAdFragment extends Fragment {
     private String AD_UNIT_ID = "ydxcoGD-SPr_w7AItL5VRHVXwZle6TD2S6I4MKf7";
 
     public void setAdUnitId(String AD_UNIT_ID) {
-        if (AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
+        if (AD_UNIT_ID != null && !
+                AD_UNIT_ID.isEmpty()) {
             ANLog.e("Placement id: " + AD_UNIT_ID);
             if (AD_UNIT_ID.contains(",")) {
                 String a[] = AD_UNIT_ID.split(",");

@@ -19,7 +19,7 @@ public class NativeAdFragment extends Fragment {
 
     private ANNativeAd mNativeAd;
 
-    private String AD_UNIT_ID = "ping";
+    private String AD_UNIT_ID = "2Pwo1otj1C5T8y6Uuz9v-xbY1aB09x8rWKvsJ-HI";
 
     public void setAdUnitId(String AD_UNIT_ID) {
         if(AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
