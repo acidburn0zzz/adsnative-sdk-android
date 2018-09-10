@@ -50,7 +50,7 @@ public class PolymorphBannerAdapter implements CustomEventBanner {
     }
 
 
-    static class PolymorphStaticBannerAd implements PMBannerAdListener {
+    static class PolymorphStaticBannerAd{
 
         private Context mContext;
         private PMBannerView mBannerView;
@@ -67,25 +67,33 @@ public class PolymorphBannerAdapter implements CustomEventBanner {
         }
 
         void loadAd() {
-            this.onBannerAdLoaded(mBannerView);
-        }
+            mBannerView.setBannerAdListener(new PMBannerAdListener() {
+                @Override
+                public void onBannerAdLoaded(PMBannerView bannerView) {
+                    ANLog.d("PM Banner ad loaded");
+                    mCustomEventBannerListener.onAdLoaded(bannerView);
+                }
 
-        @Override
-        public void onBannerAdLoaded(PMBannerView bannerView) {
-            mCustomEventBannerListener.onAdLoaded(bannerView);
-        }
+                @Override
+                public void onBannerReceived(PMBannerView bannerView) {
+                }
 
-        @Override
-        public void onBannerAdClicked(PMBannerView bannerView) {
-            mCustomEventBannerListener.onAdClicked();
-            mCustomEventBannerListener.onAdOpened();
-            mCustomEventBannerListener.onAdLeftApplication();
-        }
+                @Override
+                public void onBannerAdClicked(PMBannerView bannerView) {
+                    ANLog.d("PM Banner ad clicked");
+                    mCustomEventBannerListener.onAdClicked();
+                    mCustomEventBannerListener.onAdOpened();
+                    mCustomEventBannerListener.onAdLeftApplication();
+                }
 
-        @Override
-        public void onBannerAdFailed(String message) {
-            ANLog.e(message);
-            mCustomEventBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
+                @Override
+                public void onBannerAdFailed(String message) {
+                    ANLog.d("PM Banner ad failed");
+                    ANLog.e(message);
+                    mCustomEventBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
+                }
+            });
+            mBannerView.prepare();
         }
 
     }

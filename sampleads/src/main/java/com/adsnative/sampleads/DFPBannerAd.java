@@ -21,9 +21,11 @@ import java.net.URLEncoder;
  */
 
 public class DFPBannerAd extends Fragment {
-    private static String DFP_AD_UNIT_ID = "/6499/example/banner";
     private PublisherAdView adView;
-    private String PM_AD_UNIT_ID = "4U2khh1YfnOtZRTlQgk1ir_Il_JBY5ljLKk3pKnI";
+
+    private String DFP_AD_UNIT_ID = "/21666124832/pm_test";
+    //private static String DFP_AD_UNIT_ID = "/6499/example/banner";
+    private String PM_AD_UNIT_ID = "ydxcoGD-SPr_w7AItL5VRHVXwZle6TD2S6I4MKf7";
 
     public void setAdUnitId(String AD_UNIT_ID) {
         if (AD_UNIT_ID != null && !AD_UNIT_ID.isEmpty()) {
@@ -56,9 +58,10 @@ public class DFPBannerAd extends Fragment {
 
             }
         });
-        PolymorphBidder pm_bidder = new PolymorphBidder(getContext(), PM_AD_UNIT_ID, adView);
+        PolymorphBidder pm_bidder = new PolymorphBidder(getContext(),PM_AD_UNIT_ID, adView);
         pm_bidder.loadDFPAd();
-//        adView.loadAd(new PublisherAdRequest.Builder().build());
+//        pm_bidder.loadDFPBannerAd(PM_AD_UNIT_ID, adView);
+//        adView.loadDFPAd(new PublisherAdRequest.Builder().build());
         return view;
     }
 }

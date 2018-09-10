@@ -185,6 +185,7 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                         mFbNativeAd.registerViewForInteraction(view, fbMediaView, adIconView);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        mFbNativeAd.registerViewForInteraction(view, fbMediaView);
                     }
                 } else {
                     ANLog.e("FbAdNetwork: couldn't find icon imageview in layout!");

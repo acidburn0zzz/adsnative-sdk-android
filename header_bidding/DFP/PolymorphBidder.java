@@ -184,6 +184,10 @@ public class PolymorphBidder {
         PMunifiedAd.setBannerAdListener(new PMBannerAdListener() {
             @Override
             public void onBannerAdLoaded(PMBannerView bannerView) {
+            }
+
+            @Override
+            public void onBannerReceived(PMBannerView bannerView) {
                 if (PrefetchAds.getBannerSize() > 0) {
                     PrefetchAds.getBannerAd(); // clear cache
                 }
@@ -219,6 +223,10 @@ public class PolymorphBidder {
                 pubAdView.loadAd(pubBuilder.build());
             }
         });
+        // set lazy loading so that impressions trackers
+        // are fired only when banner ad is rendered
+        // and not when its cached
+        PMunifiedAd.setLazyLoading(true);
         PMunifiedAd.loadAd(requestParameters);
     }
 
@@ -235,6 +243,10 @@ public class PolymorphBidder {
         PMunifiedAd.setBannerAdListener(new PMBannerAdListener() {
             @Override
             public void onBannerAdLoaded(PMBannerView bannerView) {
+            }
+
+            @Override
+            public void onBannerReceived(PMBannerView bannerView) {
                 if (PrefetchAds.getBannerSize() > 0) {
                     PrefetchAds.getBannerAd(); // clear cache
                 }
@@ -313,6 +325,10 @@ public class PolymorphBidder {
                 return false;
             }
         });
+        // set lazy loading so that impressions trackers
+        // are fired only when banner ad is rendered
+        // and not when its cached
+        PMunifiedAd.setLazyLoading(true);
         PMunifiedAd.loadAd(requestParameters);
 
     }

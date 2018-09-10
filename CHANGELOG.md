@@ -1,3 +1,7 @@
+## v3.1.1
+1. Added delayed lazy loading support for banner ads
+2. Updated FB adapter to handle exception in fetching icon images
+
 ## v3.1.0
 1. Added support for the latest FB SDK (v 4.99.3)
 2. FB SDK support with DFP Header bidding
