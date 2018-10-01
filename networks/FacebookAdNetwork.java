@@ -91,7 +91,7 @@ public class FacebookAdNetwork extends CustomAdNetwork {
 
         void loadAd() {
             // for testing purpose only
-//            AdSettings.addTestDevice("0cdf374f83fda2c592ff2fd20109576b");
+//            AdSettings.addTestDevice("4e7243f2-2e4e-451b-a332-7430b75e3373");
             if (mFbNativeAd != null) {
                 mFbNativeAd.setAdListener(this);
                 mFbNativeAd.loadAd();
@@ -181,7 +181,6 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                         parent.removeView(icon);
                         AdIconView adIconView = new AdIconView(mContext);
                         parent.addView(adIconView, icon.getLayoutParams().width, icon.getLayoutParams().height);
-                        parent.requestLayout();
                         mFbNativeAd.registerViewForInteraction(view, fbMediaView, adIconView);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -191,11 +190,13 @@ public class FacebookAdNetwork extends CustomAdNetwork {
                     ANLog.e("FbAdNetwork: couldn't find icon imageview in layout!");
                     mFbNativeAd.registerViewForInteraction(view, fbMediaView);
                 }
-
+                // setting OverridingClickTracker
+                // so that clicks can be tracked by FB
+                // not setting OverridingImpressionTracker
+                // so that viewability can be tracked by PM
                 setOverridingClickTracker(true);
-                setOverridingImpressionTracker(true);
             } else {
-                ANLog.e("Attempted to invoke registerViewForInteraction on null mFbNativeAd");
+                ANLog.e("facebook ad object is null!");
             }
         }
 

@@ -120,9 +120,10 @@ public class PolymorphBidder {
             @Override
             public void onAdLoaded(NativeAdUnit nativeAdUnit) {
                 if (PrefetchAds.getSize() > 0) {
-                    PrefetchAds.getAd(); // clear cache
+                    PrefetchAds.clearNativeAd(); // clear cache
                 }
                 PrefetchAds.setAd(nativeAdUnit);
+                PrefetchAds.setAdRequest(PMunifiedAd);
                 Double ecpm = nativeAdUnit.getEcpm();
 
                 // get bidding interval from server
@@ -286,9 +287,10 @@ public class PolymorphBidder {
             @Override
             public void onAdLoaded(NativeAdUnit nativeAdUnit) {
                 if (PrefetchAds.getSize() > 0) {
-                    PrefetchAds.getAd(); // clear cache
+                    PrefetchAds.clearNativeAd(); // clear cache
                 }
                 PrefetchAds.setAd(nativeAdUnit);
+                PrefetchAds.setAdRequest(PMunifiedAd);
                 Double ecpm = nativeAdUnit.getEcpm();
 
                 // get bidding interval from server
@@ -318,6 +320,7 @@ public class PolymorphBidder {
 
             @Override
             public void onAdImpressionRecorded() {
+
             }
 
             @Override

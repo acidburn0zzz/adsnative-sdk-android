@@ -19,27 +19,32 @@ public class ANSampleActivity extends FragmentActivity {
         DefaultFragment defaultFragment = new DefaultFragment();
         loadFragment(defaultFragment, false, false);
 
-//        Button btnListView = (Button) findViewById(R.id.btn_list_view);
-//        btnListView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ListViewFragment listViewFragment = new ListViewFragment();
-//                EditText placementId = (EditText) findViewById(R.id.placement_id);
-//                listViewFragment.setAdUnitId(placementId.getText().toString());
-//                loadFragment(listViewFragment, true, true);
-//            }
-//        });
-//
-//        Button btnRecyclerView = (Button) findViewById(R.id.btn_recycler_view);
-//        btnRecyclerView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                RecyclerViewFragment recyclerViewFragment = new RecyclerViewFragment();
-//                EditText placementId = (EditText) findViewById(R.id.placement_id);
-//                recyclerViewFragment.setAdUnitId(placementId.getText().toString());
-//                loadFragment(recyclerViewFragment, true, true);
-//            }
-//        });
+        Button btnListView = (Button) findViewById(R.id.btn_list_view);
+        btnListView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListViewFragment listViewFragment = new ListViewFragment();
+                loadFragment(listViewFragment, true, true);
+            }
+        });
+
+        Button btnRecyclerView = (Button) findViewById(R.id.btn_recycler_view);
+        btnRecyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RecyclerViewFragment recyclerViewFragment = new RecyclerViewFragment();
+                loadFragment(recyclerViewFragment, true, true);
+            }
+        });
+
+        Button btnDFPRecyclerView = (Button) findViewById(R.id.btn_dfp_recycler_view);
+        btnDFPRecyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DFPRecyclerView recyclerViewFragment = new DFPRecyclerView();
+                loadFragment(recyclerViewFragment, true, true);
+            }
+        });
 
         Button btnNativeAd = (Button) findViewById(R.id.btn_native_ad);
         btnNativeAd.setOnClickListener(new View.OnClickListener() {
@@ -61,27 +66,27 @@ public class ANSampleActivity extends FragmentActivity {
                 loadFragment(nativeAdFragment, true, true);
             }
         });
-
-        Button btnBannerAd = (Button) findViewById(R.id.btn_banner_ad);
-        btnBannerAd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BannerAdFragment bannerAdFragment = new BannerAdFragment();
-                EditText placementId = (EditText) findViewById(R.id.placement_id);
-                bannerAdFragment.setAdUnitId(placementId.getText().toString());
-                loadFragment(bannerAdFragment, true, true);
-            }
-        });
-        Button btnDFPBannerAd = (Button) findViewById(R.id.btn_dfp_banner_ad);
-        btnDFPBannerAd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DFPBannerAd bannerAdFragment = new DFPBannerAd();
-                EditText placementId = (EditText) findViewById(R.id.placement_id);
-                bannerAdFragment.setAdUnitId(placementId.getText().toString());
-                loadFragment(bannerAdFragment, true, true);
-            }
-        });
+//
+//        Button btnBannerAd = (Button) findViewById(R.id.btn_banner_ad);
+//        btnBannerAd.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                BannerAdFragment bannerAdFragment = new BannerAdFragment();
+//                EditText placementId = (EditText) findViewById(R.id.placement_id);
+//                bannerAdFragment.setAdUnitId(placementId.getText().toString());
+//                loadFragment(bannerAdFragment, true, true);
+//            }
+//        });
+//        Button btnDFPBannerAd = (Button) findViewById(R.id.btn_dfp_banner_ad);
+//        btnDFPBannerAd.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                DFPBannerAd bannerAdFragment = new DFPBannerAd();
+//                EditText placementId = (EditText) findViewById(R.id.placement_id);
+//                bannerAdFragment.setAdUnitId(placementId.getText().toString());
+//                loadFragment(bannerAdFragment, true, true);
+//            }
+//        });
     }
 
     private void loadFragment(Fragment adFragment, boolean replace, boolean addToBackStack) {

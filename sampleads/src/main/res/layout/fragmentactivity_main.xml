@@ -15,55 +15,63 @@
 
     </EditText>
 
-    <!--<Button-->
-    <!--android:id="@+id/btn_list_view"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="50dp"-->
-    <!--android:layout_below="@+id/placement_id"-->
-    <!--android:text="Ads in List View" />-->
+    <Button
+        android:id="@+id/btn_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/placement_id"
+        android:text="Ads in List View" />
 
-    <!--<Button-->
-    <!--android:id="@+id/btn_recycler_view"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="50dp"-->
-    <!--android:layout_below="@+id/btn_list_view"-->
-    <!--android:text="Ads in Recycler View" />-->
+    <Button
+        android:id="@+id/btn_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/btn_list_view"
+        android:text="Ads in Recycler View" />
+
+    <Button
+        android:id="@+id/btn_dfp_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/btn_recycler_view"
+        android:text="DFP Recycler View" />
 
 
     <Button
         android:id="@+id/btn_dfp_native_ad"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_below="@+id/btn_native_ad"
+        android:layout_below="@+id/btn_dfp_recycler_view"
         android:text="DFP Native HB" />
 
-    <Button
-        android:id="@+id/btn_banner_ad"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/placement_id"
-        android:text="Banner Ad" />
+    <!--<Button-->
+    <!--android:id="@+id/btn_banner_ad"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="50dp"-->
+    <!--android:layout_below="@+id/placement_id"-->
+    <!--android:text="Banner Ad" />-->
 
-    <Button
-        android:id="@+id/btn_dfp_banner_ad"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/btn_dfp_native_ad"
-        android:text="DFP Banner HB" />
+    <!--<Button-->
+    <!--android:id="@+id/btn_dfp_banner_ad"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="50dp"-->
+    <!--android:layout_below="@+id/btn_dfp_native_ad"-->
+    <!--android:text="DFP Banner HB" />-->
 
     <Button
         android:id="@+id/btn_native_ad"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Native Ad"
-        android:layout_below="@+id/btn_banner_ad"
+        android:layout_below="@+id/btn_dfp_native_ad"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
 
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_dfp_banner_ad" />
+        android:layout_below="@+id/btn_native_ad" />
 
 </RelativeLayout>

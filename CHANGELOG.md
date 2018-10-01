@@ -1,3 +1,8 @@
+## v3.1.2
+1. Impression tracking happens when the first pixel is visible
+2. Viewability tracking happens when 50% of the adview is visible for 1 second
+3. Switched the click/imps tracking of DFP HB ads from DFP to PM
+
 ## v3.1.1
 1. Added delayed lazy loading support for banner ads
 2. Updated FB adapter to handle exception in fetching icon images

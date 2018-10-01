@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import com.adsnative.ads.ANAdListener;
 import com.adsnative.ads.NativeAdUnit;
+import com.adsnative.ads.PMUnifiedAd;
 import com.adsnative.ads.PrefetchAds;
 import com.adsnative.util.ANLog;
 import com.google.android.gms.ads.AdRequest;
@@ -35,7 +36,7 @@ public class PolymorphAdapter implements CustomEventNative {
         // check if there's a cached PM ad
         if (PrefetchAds.getSize() > 0 && ((nativeAdUnit = PrefetchAds.getAd()) != null)) {
             final PolymorphStaticNativeAd polymorphStaticNativeAd = new PolymorphStaticNativeAd(
-                    context, nativeAdUnit, customEventNativeListener, nativeMediationAdRequest);
+                    context, nativeAdUnit, customEventNativeListener, nativeMediationAdRequest, PrefetchAds.getAdRequest());
             polymorphStaticNativeAd.loadAd();
 
         } else {
@@ -65,14 +66,16 @@ public class PolymorphAdapter implements CustomEventNative {
         private NativeAdUnit mNativeAd;
         private CustomEventNativeListener mCustomEventNativeListener;
         private NativeMediationAdRequest mNativeMediationRequest;
+        private PMUnifiedAd mPMUnifiedAd;
 
         PolymorphStaticNativeAd(final Context context,
                                 final NativeAdUnit nativeAd,
-                                final CustomEventNativeListener customEventNativeListener, NativeMediationAdRequest nativeMediationAdRequest) {
+                                final CustomEventNativeListener customEventNativeListener, NativeMediationAdRequest nativeMediationAdRequest, PMUnifiedAd adRequest) {
             mContext = context;
             mNativeAd = nativeAd;
             mCustomEventNativeListener = customEventNativeListener;
             mNativeMediationRequest = nativeMediationAdRequest;
+            mPMUnifiedAd = adRequest;
         }
 
         void loadAd() {
@@ -82,9 +85,9 @@ public class PolymorphAdapter implements CustomEventNative {
         public void onAdLoaded(NativeAdUnit nativeAdUnit) {
             if (nativeAdUnit.getCallToAction() != null && !nativeAdUnit.getCallToAction().isEmpty()
                     && (nativeAdUnit.getIconImage() != null || nativeAdUnit.getType().equalsIgnoreCase("facebook"))) {
-                mCustomEventNativeListener.onAdLoaded(new PMNativeAppInstallAdMapper(nativeAdUnit, mCustomEventNativeListener, mContext));
+                mCustomEventNativeListener.onAdLoaded(new PMNativeAppInstallAdMapper(nativeAdUnit, mCustomEventNativeListener, mPMUnifiedAd, mContext));
             } else {
-                mCustomEventNativeListener.onAdLoaded(new PMNativeContentAdMapper(nativeAdUnit, mCustomEventNativeListener, mContext));
+                mCustomEventNativeListener.onAdLoaded(new PMNativeContentAdMapper(nativeAdUnit, mCustomEventNativeListener, mPMUnifiedAd, mContext));
             }
         }
 
@@ -97,8 +100,9 @@ public class PolymorphAdapter implements CustomEventNative {
 
     static class PMNativeContentAdMapper extends NativeContentAdMapper {
         private NativeAdUnit mNativeAdUnit;
+        private PMUnifiedAd mPMUnifiedAd;
 
-        PMNativeContentAdMapper(NativeAdUnit nativeAdUnit, final CustomEventNativeListener mCustomEventNativeListener, Context mContext) {
+        PMNativeContentAdMapper(NativeAdUnit nativeAdUnit, final CustomEventNativeListener mCustomEventNativeListener, PMUnifiedAd adRequest, Context mContext) {
             nativeAdUnit.setPubCallbacksListener(new ANAdListener() {
                 @Override
                 public void onAdLoaded(NativeAdUnit nativeAdUnit) {
@@ -129,6 +133,7 @@ public class PolymorphAdapter implements CustomEventNative {
             });
             // Mapping PM ad assets to DFP
             mNativeAdUnit = nativeAdUnit;
+            mPMUnifiedAd = adRequest;
             setHeadline(mNativeAdUnit.getTitle());
             setBody(mNativeAdUnit.getSummary());
             setAdvertiser(mNativeAdUnit.getPromotedBy());
@@ -144,8 +149,6 @@ public class PolymorphAdapter implements CustomEventNative {
             if (imagesList.size() > 0)
                 setImages(imagesList);
             if (mNativeAdUnit.getMediaView() != null) {
-                setOverrideClickHandling(true);
-                setOverrideImpressionRecording(true);
                 setMediaView(mNativeAdUnit.getMediaView());
                 setHasVideoContent(true);
             }
@@ -156,12 +159,21 @@ public class PolymorphAdapter implements CustomEventNative {
                 nativeAdUnit.loadAdChoicesImage(adchoicesView);
                 setAdChoicesContent(adchoicesView);
             }
+            // both clicks and impressions will be tracked by PM
+            // and forwarded to DFP
+            setOverrideClickHandling(true);
+            setOverrideImpressionRecording(true);
         }
 
         @Override
         public void trackViews(View view, Map<String, View> map, Map<String, View> map1) {
-            if (getOverrideClickHandling())
+            if (getOverrideClickHandling()) {
                 mNativeAdUnit.prepare(view);
+
+                // attaching view for tracking clicks and imps
+                if (mPMUnifiedAd != null)
+                    mPMUnifiedAd.attachViewForInteraction(mNativeAdUnit, view);
+            }
         }
 
         @Override
@@ -183,8 +195,9 @@ public class PolymorphAdapter implements CustomEventNative {
 
     static class PMNativeAppInstallAdMapper extends NativeAppInstallAdMapper {
         private NativeAdUnit mNativeAdUnit;
+        private PMUnifiedAd mPMUnifiedAd;
 
-        PMNativeAppInstallAdMapper(NativeAdUnit nativeAdUnit, final CustomEventNativeListener mCustomEventNativeListener, Context mContext) {
+        PMNativeAppInstallAdMapper(NativeAdUnit nativeAdUnit, final CustomEventNativeListener mCustomEventNativeListener, PMUnifiedAd adRequest, Context mContext) {
             nativeAdUnit.setPubCallbacksListener(new ANAdListener() {
                 @Override
                 public void onAdLoaded(NativeAdUnit nativeAdUnit) {
@@ -215,6 +228,7 @@ public class PolymorphAdapter implements CustomEventNative {
             });
             // Mapping PM ad assets to DFP
             mNativeAdUnit = nativeAdUnit;
+            mPMUnifiedAd = adRequest;
             setHeadline(mNativeAdUnit.getTitle());
             setBody(mNativeAdUnit.getSummary());
             setCallToAction(mNativeAdUnit.getCallToAction());
@@ -228,8 +242,7 @@ public class PolymorphAdapter implements CustomEventNative {
             if (imagesList.size() > 0)
                 setImages(imagesList);
             if (mNativeAdUnit.getMediaView() != null) {
-                setOverrideClickHandling(true);
-                setOverrideImpressionRecording(true);
+
                 setMediaView(mNativeAdUnit.getMediaView());
                 setHasVideoContent(true);
             }
@@ -240,12 +253,20 @@ public class PolymorphAdapter implements CustomEventNative {
                 nativeAdUnit.loadAdChoicesImage(adchoicesView);
                 setAdChoicesContent(adchoicesView);
             }
+            // both clicks and impressions will be tracked by PM
+            // and forwarded to DFP
+            setOverrideClickHandling(true);
+            setOverrideImpressionRecording(true);
         }
 
         @Override
         public void trackViews(View view, Map<String, View> map, Map<String, View> map1) {
             if (getOverrideClickHandling()) {
                 mNativeAdUnit.prepare(view);
+
+                // attaching view for tracking clicks and imps
+                if (mPMUnifiedAd != null)
+                    mPMUnifiedAd.attachViewForInteraction(mNativeAdUnit, view);
             }
         }
 
