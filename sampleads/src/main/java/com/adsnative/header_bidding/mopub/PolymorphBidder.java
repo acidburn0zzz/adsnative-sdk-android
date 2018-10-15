@@ -8,6 +8,8 @@ import com.adsnative.ads.ANNativeAd;
 import com.adsnative.ads.ANRequestParameters;
 import com.adsnative.ads.NativeAdUnit;
 import com.adsnative.ads.PrefetchAds;
+import com.adsnative.util.ANLog;
+import com.adsnative.util.Utils;
 import com.mopub.nativeads.MoPubAdAdapter;
 import com.mopub.nativeads.MoPubNative;
 import com.mopub.nativeads.RequestParameters;
@@ -22,6 +24,7 @@ import java.util.List;
 public class PolymorphBidder {
 
     private Context mContext;
+    private Double biddingInterval = 0.05;
 
     public PolymorphBidder(Context context) {
         this.mContext = context;
@@ -40,12 +43,22 @@ public class PolymorphBidder {
                 }
                 PrefetchAds.setAd(nativeAdUnit);
                 Double ecpm = nativeAdUnit.getEcpm();
-                if (ecpm != null) {
-                    RequestParameters requestParameters = null;
+
+                // get bidding interval from server
+                if (nativeAdUnit.getBiddingInterval() != null) {
+                    biddingInterval = nativeAdUnit.getBiddingInterval();
+                }
+                ANLog.d("biddingInterval: " + biddingInterval);
+                Double roundedEcpm = Utils.roundEcpm(ecpm, biddingInterval);
+
+                if (roundedEcpm != null) {
+                    String bidPrice = String.format("%.2f", roundedEcpm);
+                    ANLog.d("passing ecpm of" + " " + bidPrice);
+                    RequestParameters requestParameters;
                     if (moPubrequestParameters == null) {
-                        requestParameters = new RequestParameters.Builder().keywords("ecpm:" + ecpm).build();
+                        requestParameters = new RequestParameters.Builder().keywords("ecpm:" + bidPrice).build();
                     } else {
-                        requestParameters = new RequestParameters.Builder().keywords("ecpm: " + ecpm + "," + moPubrequestParameters.getKeywords()).build();
+                        requestParameters = new RequestParameters.Builder().keywords("ecpm: " + bidPrice + "," + moPubrequestParameters.getKeywords()).build();
                     }
                     moPubNative.makeRequest(requestParameters);
                 } else {
