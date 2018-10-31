@@ -1,4 +1,4 @@
-package com.adsnative.header_bidding.nativeads;
+package com.mopub.nativeads;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -6,9 +6,12 @@ import android.support.annotation.NonNull;
 import com.adsnative.ads.ANAdListener;
 import com.adsnative.ads.ANNativeAd;
 import com.adsnative.ads.ANRequestParameters;
+import com.adsnative.ads.AdHelper;
 import com.adsnative.ads.NativeAdUnit;
+import com.adsnative.ads.PMUnifiedAd;
 import com.adsnative.ads.PrefetchAds;
-import com.mopub.nativeads.MoPubAdAdapter;
+import com.adsnative.util.ANLog;
+import com.adsnative.util.Utils;
 import com.mopub.nativeads.MoPubNative;
 import com.mopub.nativeads.RequestParameters;
 
@@ -22,6 +25,7 @@ import java.util.List;
 public class PolymorphBidder {
 
     private Context mContext;
+    private Double biddingInterval = 0.05;
 
     public PolymorphBidder(Context context) {
         this.mContext = context;
@@ -31,21 +35,32 @@ public class PolymorphBidder {
         List<String> keywords = new ArrayList<String>();
         keywords.add("&hb=1");
         ANRequestParameters requestParameters = new ANRequestParameters.Builder().keywords(keywords).build();
-        ANNativeAd anNativeAd = new ANNativeAd(this.mContext, pm_ad_unit_id);
-        anNativeAd.setNativeAdListener(new ANAdListener() {
+        final PMUnifiedAd pmUnifiedAd = new PMUnifiedAd(this.mContext, pm_ad_unit_id, AdHelper.AdTypes.AD_TYPE_NATIVE);
+        pmUnifiedAd.setNativeAdListener(new ANAdListener() {
             @Override
             public void onAdLoaded(NativeAdUnit nativeAdUnit) {
                 if (PrefetchAds.getSize() > 0) {
                     PrefetchAds.getAd(); // clear stale prefetched ad
                 }
                 PrefetchAds.setAd(nativeAdUnit);
+                PrefetchAds.setAdRequest(pmUnifiedAd);
                 Double ecpm = nativeAdUnit.getEcpm();
-                if (ecpm != null) {
-                    RequestParameters requestParameters = null;
+
+                // get bidding interval from server
+                if (nativeAdUnit.getBiddingInterval() != null) {
+                    biddingInterval = nativeAdUnit.getBiddingInterval();
+                }
+                ANLog.d("biddingInterval: " + biddingInterval);
+                Double roundedEcpm = Utils.roundEcpm(ecpm, biddingInterval);
+
+                if (roundedEcpm != null) {
+                    String bidPrice = String.format("%.2f", roundedEcpm);
+                    ANLog.d("passing ecpm of" + " " + bidPrice);
+                    RequestParameters requestParameters;
                     if (moPubrequestParameters == null) {
-                        requestParameters = new RequestParameters.Builder().keywords("ecpm:" + ecpm).build();
+                        requestParameters = new RequestParameters.Builder().keywords("ecpm:" + bidPrice).build();
                     } else {
-                        requestParameters = new RequestParameters.Builder().keywords("ecpm: " + ecpm + "," + moPubrequestParameters.getKeywords()).build();
+                        requestParameters = new RequestParameters.Builder().keywords("ecpm: " + bidPrice + "," + moPubrequestParameters.getKeywords()).build();
                     }
                     moPubNative.makeRequest(requestParameters);
                 } else {
@@ -77,6 +92,6 @@ public class PolymorphBidder {
                 return false;
             }
         });
-        anNativeAd.loadAd(requestParameters);
+        pmUnifiedAd.loadAd(requestParameters);
     }
 }
