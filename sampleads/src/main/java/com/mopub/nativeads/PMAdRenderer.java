@@ -2,13 +2,11 @@ package com.mopub.nativeads;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -28,43 +26,6 @@ import com.mopub.nativeads.PolymorphNativeAdNetwork.PolymorphVideoEnabledAd;
 public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
 
     /**
-     * Key to set and get star rating text view as an extra in the view binder.
-     */
-    public static final String VIEW_BINDER_KEY_STAR_RATING = "key_star_rating";
-
-    /**
-     * Key to set and get advertiser text view as an extra in the view binder.
-     */
-    public static final String VIEW_BINDER_KEY_ADVERTISER = "key_advertiser";
-
-    /**
-     * Key to set and get store text view as an extra in the view binder.
-     */
-    public static final String VIEW_BINDER_KEY_STORE = "key_store";
-
-    /**
-     * Key to set and get price text view as an extra in the view binder.
-     */
-    public static final String VIEW_BINDER_KEY_PRICE = "key_price";
-
-    /**
-     * Key to set and get the AdChoices icon view as an extra in the view binder.
-     */
-    public static final String VIEW_BINDER_KEY_AD_CHOICES_ICON_CONTAINER = "ad_choices_container";
-
-    /**
-     * ID for the frame layout that wraps the Google ad view.
-     */
-    @IdRes
-    private static final int ID_WRAPPING_FRAME = 1001;
-
-    /**
-     * ID for the Google native ad view.
-     */
-    @IdRes
-    private static final int ID_GOOGLE_NATIVE_VIEW = 1002;
-
-    /**
      * A view binder containing the layout resource and views to be rendered by the renderer.
      */
     private final PolymorphViewBinder mViewBinder;
@@ -72,7 +33,7 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
     /**
      * A weak hash map used to keep track of view holder so that the views can be properly recycled.
      */
-    private final WeakHashMap<View, GoogleStaticNativeViewHolder> mViewHolderMap;
+    private final WeakHashMap<View, PolymorphViewHolder> mViewHolderMap;
 
     public PMAdRenderer(PolymorphViewBinder viewBinder) {
         this.mViewBinder = viewBinder;
@@ -90,9 +51,9 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
     @Override
     public void renderAdView(@NonNull View view,
                              @NonNull PolymorphVideoEnabledAd nativeAd) {
-        GoogleStaticNativeViewHolder viewHolder = mViewHolderMap.get(view);
+        PolymorphViewHolder viewHolder = mViewHolderMap.get(view);
         if (viewHolder == null) {
-            viewHolder = GoogleStaticNativeViewHolder.fromViewBinder(view, mViewBinder);
+            viewHolder = PolymorphViewHolder.fromViewBinder(view, mViewBinder);
             mViewHolderMap.put(view, viewHolder);
         }
         update(nativeAd, viewHolder);
@@ -103,43 +64,39 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
     /**
      * This method will render the given native ad view using the native ad and set the views to
      * Google's native ad view.
-     *  @param staticNativeAd         a static native ad object containing the required assets to
+     *  @param polymorphAd         a static native ad object containing the required assets to
      *                               set to the native ad view.
-     * @param staticNativeViewHolder a static native view holder object containing the mapped
+     * @param polymorphViewHolder a static native view holder object containing the mapped
      */
 
 
-    private void update(PolymorphVideoEnabledAd staticNativeAd,
-                        GoogleStaticNativeViewHolder staticNativeViewHolder) {
+    private void update(PolymorphVideoEnabledAd polymorphAd,
+                        PolymorphViewHolder polymorphViewHolder) {
         NativeRendererHelper.addTextView(
-                staticNativeViewHolder.mTitleView, staticNativeAd.getTitle());
+                polymorphViewHolder.mTitleView, polymorphAd.getTitle());
         NativeRendererHelper.addTextView(
-                staticNativeViewHolder.mTextView, staticNativeAd.getText());
-        if (staticNativeViewHolder.mMediaView != null && staticNativeAd.getMediaView() != null) {
-            staticNativeViewHolder.mMediaView.removeAllViews();
-            ANLog.e("staticNativeAd.getMediaView(): "+ staticNativeAd.getMediaView());
-            staticNativeViewHolder.mMediaView.addView(staticNativeAd.getMediaView());
+                polymorphViewHolder.mTextView, polymorphAd.getText());
+        if (polymorphViewHolder.mMediaView != null && polymorphAd.getMediaView() != null) {
+            polymorphViewHolder.mMediaView.removeAllViews();
+            polymorphViewHolder.mMediaView.addView(polymorphAd.getMediaView());
 
         }
-        NativeRendererHelper.addTextView(staticNativeViewHolder.mCallToActionView,
-                staticNativeAd.getCallToAction());
-//        unifiedAdView.setCallToActionView(staticNativeViewHolder.mCallToActionView);
-//        NativeImageHelper.loadImageView(staticNativeAd.getIconImageUrl(),
-//                staticNativeViewHolder.mIconImageView);
-
-        if (staticNativeViewHolder.mMainImageView != null && staticNativeAd.getMainImageUrl() != null) {
-            NativeImageHelper.loadImageView(staticNativeAd.getMainImageUrl(), staticNativeViewHolder.mMainImageView);
+        NativeRendererHelper.addTextView(polymorphViewHolder.mCallToActionView,
+                polymorphAd.getCallToAction());
+        if (polymorphViewHolder.mIconImageView != null && polymorphAd.getIconImageUrl() != null) {
+            NativeImageHelper.loadImageView(polymorphAd.getIconImageUrl(),
+                    polymorphViewHolder.mIconImageView);
         }
-//        if (staticNativeAd.getAdvertiser() != null) {
-//            NativeRendererHelper.addTextView(
-//                    staticNativeViewHolder.mAdvertiserTextView, staticNativeAd.getAdvertiser());
-//            unifiedAdView.setAdvertiserView(staticNativeViewHolder.mAdvertiserTextView);
-//        }
-//         Add the AdChoices icon to the container if one is provided by the publisher.
-        if (staticNativeViewHolder.mAdChoicesIconContainer != null) {
+
+        if (polymorphViewHolder.mMainImageView != null && polymorphAd.getMainImageUrl() != null) {
+            NativeImageHelper.loadImageView(polymorphAd.getMainImageUrl(), polymorphViewHolder.mMainImageView);
+        }
+
+        // Add the AdChoices icon to the container if one is provided by the publisher.
+        if (polymorphViewHolder.mAdChoicesIconContainer != null) {
             ANLog.e("adding adchoices");
-            staticNativeViewHolder.mAdChoicesIconContainer.removeAllViews();
-            final AdChoicesView adChoicesView = (AdChoicesView) staticNativeAd.getAdChoicesView();
+            polymorphViewHolder.mAdChoicesIconContainer.removeAllViews();
+            final AdChoicesView adChoicesView = (AdChoicesView) polymorphAd.getAdChoicesView();
             ViewGroup.LayoutParams layoutParams = adChoicesView.getLayoutParams();
             if (layoutParams instanceof RelativeLayout.LayoutParams) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -148,14 +105,8 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
                     ((RelativeLayout.LayoutParams) layoutParams).addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 }
             }
-            staticNativeViewHolder.mAdChoicesIconContainer.addView(adChoicesView);
+            polymorphViewHolder.mAdChoicesIconContainer.addView(adChoicesView);
         }
-
-        // Set the privacy information icon to null as the Google Mobile Ads SDK automatically
-        // renders the AdChoices icon.
-//        NativeRendererHelper.addPrivacyInformationIcon(
-//                staticNativeViewHolder.mPrivacyInformationIconImageView, null, null);
-
     }
 
     @Override
@@ -163,7 +114,7 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
         return nativeAd instanceof PolymorphVideoEnabledAd;
     }
 
-    private static class GoogleStaticNativeViewHolder {
+    private static class PolymorphViewHolder {
         @Nullable
         View mMainView;
         @Nullable
@@ -173,7 +124,7 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
         @Nullable
         TextView mCallToActionView;
         @Nullable
-        AdIconView mIconImageView;
+        ImageView mIconImageView;
         @Nullable
         ImageView mMainImageView;
         @Nullable
@@ -187,18 +138,18 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
         @Nullable
         TextView mPriceTextView;
         @Nullable
-        RelativeLayout mAdChoicesIconContainer;
+        LinearLayout mAdChoicesIconContainer;
         @Nullable
         LinearLayout mMediaView;
 
-        private static final GoogleStaticNativeViewHolder EMPTY_VIEW_HOLDER =
-                new GoogleStaticNativeViewHolder();
+        private static final PolymorphViewHolder EMPTY_VIEW_HOLDER =
+                new PolymorphViewHolder();
 
         @NonNull
-        public static GoogleStaticNativeViewHolder fromViewBinder(@NonNull View view,
-                                                                  @NonNull PolymorphViewBinder
+        public static PolymorphViewHolder fromViewBinder(@NonNull View view,
+                                                         @NonNull PolymorphViewBinder
                                                                           viewBinder) {
-            final GoogleStaticNativeViewHolder viewHolder = new GoogleStaticNativeViewHolder();
+            final PolymorphViewHolder viewHolder = new PolymorphViewHolder();
             viewHolder.mMainView = view;
             try {
                 viewHolder.mTitleView = (TextView) view.findViewById(viewBinder.titleId);
@@ -207,34 +158,13 @@ public class PMAdRenderer implements MoPubAdRenderer<PolymorphVideoEnabledAd> {
                         (TextView) view.findViewById(viewBinder.callToActionId);
 
                 viewHolder.mIconImageView =
-                        (AdIconView) view.findViewById(viewBinder.iconImageViewId);
+                        (ImageView) view.findViewById(viewBinder.iconImageViewId);
                 viewHolder.mMainImageView =
                         (ImageView) view.findViewById(viewBinder.mainImageViewId);
                 viewHolder.mAdChoicesIconContainer =
-                        (RelativeLayout) view.findViewById(viewBinder.adChoicesRelativeLayoutId);
+                        (LinearLayout) view.findViewById(viewBinder.adChoicesRelativeLayoutId);
                 viewHolder.mMediaView =
                         (LinearLayout) view.findViewById(viewBinder.mediaViewId);
-                Map<String, Integer> extraViews = viewBinder.extras;
-                Integer starRatingTextViewId = extraViews.get(VIEW_BINDER_KEY_STAR_RATING);
-                if (starRatingTextViewId != null) {
-                    viewHolder.mStarRatingTextView =
-                            (TextView) view.findViewById(starRatingTextViewId);
-                }
-                Integer advertiserTextViewId = extraViews.get(VIEW_BINDER_KEY_ADVERTISER);
-                if (advertiserTextViewId != null) {
-                    viewHolder.mAdvertiserTextView =
-                            (TextView) view.findViewById(advertiserTextViewId);
-                }
-                Integer storeTextViewId = extraViews.get(VIEW_BINDER_KEY_STORE);
-                if (storeTextViewId != null) {
-                    viewHolder.mStoreTextView = (TextView) view.findViewById(storeTextViewId);
-                }
-                Integer priceTextViewId = extraViews.get(VIEW_BINDER_KEY_PRICE);
-                if (priceTextViewId != null) {
-                    viewHolder.mPriceTextView = (TextView) view.findViewById(priceTextViewId);
-                }
-                Integer adChoicesIconViewId =
-                        extraViews.get(VIEW_BINDER_KEY_AD_CHOICES_ICON_CONTAINER);
 
                 return viewHolder;
             } catch (ClassCastException exception) {

@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.mopub.nativeads.MediaViewBinder;
 import com.mopub.nativeads.PMAdRenderer;
 import com.mopub.nativeads.PolymorphBidder;
 import com.adsnative.util.ANLog;
@@ -47,13 +46,13 @@ public class MoPubNativeAd extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_native_ad, container, false);
         final RelativeLayout nativeAdContainer = (RelativeLayout) view.findViewById(R.id.native_ad);
 
-        final PolymorphViewBinder mediaViewBinder = new PolymorphViewBinder.Builder(R.layout.fan_native_layout)
-                .mediaViewId(R.id.an_video)
-                .iconImageViewId(R.id.an_icon_image)
-                .titleId(R.id.an_title)
-                .textId(R.id.an_summary)
-                .callToActionId(R.id.an_call_to_action)
-                .adChoicesRelativeLayoutId(R.id.an_ad_choices)
+        final PolymorphViewBinder mediaViewBinder = new PolymorphViewBinder.Builder(R.layout.facebook_native_ad)
+                .mediaViewId(R.id.fb_media)
+                .iconImageViewId(R.id.fb_icon_image)
+                .titleId(R.id.fb_title)
+                .textId(R.id.fb_text)
+                .callToActionId(R.id.fb_call_to_action)
+                .adChoicesRelativeLayoutId(R.id.fb_ad_choices)
                 .build();
 
         final ViewBinder staticViewBinder = new ViewBinder.Builder(R.layout.fan_native_layout_backup)

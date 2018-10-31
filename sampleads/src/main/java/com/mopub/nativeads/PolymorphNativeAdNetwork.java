@@ -32,13 +32,6 @@ public class PolymorphNativeAdNetwork extends CustomEventNative {
                                 final Map<String, Object> localExtras,
                                 final Map<String, String> serverExtras) {
 
-        final String placementId;
-        if (extrasAreValid(serverExtras)) {
-            placementId = serverExtras.get(PLACEMENT_ID_KEY);
-        } else {
-            customEventNativeListener.onNativeAdFailed(NativeErrorCode.NATIVE_ADAPTER_CONFIGURATION_ERROR);
-            return;
-        }
         NativeAdUnit nativeAdUnit;
 
         if (PrefetchAds.getSize() > 0 && ((nativeAdUnit = PrefetchAds.getAd()) != null)) {
@@ -54,11 +47,6 @@ public class PolymorphNativeAdNetwork extends CustomEventNative {
 
         }
 
-    }
-
-    private boolean extrasAreValid(final Map<String, String> serverExtras) {
-        final String placementId = serverExtras.get(PLACEMENT_ID_KEY);
-        return (placementId != null && placementId.length() > 0);
     }
 
     static class PolymorphVideoEnabledAd extends BaseNativeAd implements ANAdListener {
@@ -168,22 +156,12 @@ public class PolymorphNativeAdNetwork extends CustomEventNative {
 
         @Override
         public void prepare(final View view) {
-//            mMopubClickHandler = new com.mopub.nativeads.NativeClickHandler(mContext);
-//            mMopubImpressionTracker = new ImpressionTracker(mContext);
-//            mMopubImpressionTracker.addView(view, this);
-//            mMopubClickHandler.setOnClickListener(view, this);
             mNativeAdUnit.prepare(view);
             mAdRequest.attachViewForInteraction(mNativeAdUnit, view);
         }
 
         @Override
         public void clear(final View view) {
-//            if (mMopubImpressionTracker != null) {
-//                mMopubImpressionTracker.removeView(view);
-//            }
-//            if (mMopubClickHandler != null) {
-//                mMopubClickHandler.clearOnClickListener(view);
-//            }
         }
 
         @Override
@@ -196,19 +174,6 @@ public class PolymorphNativeAdNetwork extends CustomEventNative {
             }
         }
 
-//        @Override
-//        public void recordImpression(@NonNull View view) {
-//            notifyAdImpressed();
-//        }
-//
-//        @Override
-//        public void handleClick(@NonNull View view) {
-//            notifyAdClicked();
-//            if (mMopubClickHandler != null) {
-//                mMopubClickHandler.openClickDestinationUrl(mLandingURL, view);
-//            }
-//        }
-
         @Override
         public void onAdLoaded(NativeAdUnit nativeAdUnit) {
             this.mNativeAdUnit = nativeAdUnit;
@@ -217,11 +182,8 @@ public class PolymorphNativeAdNetwork extends CustomEventNative {
             setIconImageUrl(nativeAdUnit.getIconImage());
             setMainImageUrl(nativeAdUnit.getMainImage());
             setCallToAction(nativeAdUnit.getCallToAction());
-//            setStarRating(nativeAdUnit.getStarRating());
             setLandingURL(nativeAdUnit.getLandingUrl());
             setMediaView(nativeAdUnit.getMediaView());
-//            setPrivacyInformationIconClickThroughUrl(nativeAdUnit.getAdChoicesClickThroughUrl());
-//            setPrivacyInformationIconImageUrl(nativeAdUnit.getAdChoicesIcon());
             setAdChoicesView(nativeAdUnit.getAdChoicesView());
             mLandingURL = nativeAdUnit.getLandingUrl();
             List<String> impTrackers = nativeAdUnit.getImpressionTrackers();
@@ -336,14 +298,7 @@ public class PolymorphNativeAdNetwork extends CustomEventNative {
             setPrivacyInformationIconClickThroughUrl(nativeAdUnit.getAdChoicesClickThroughUrl());
             setPrivacyInformationIconImageUrl(nativeAdUnit.getAdChoicesIcon());
             mLandingURL = nativeAdUnit.getLandingUrl();
-            List<String> impTrackers = nativeAdUnit.getImpressionTrackers();
-            for (String tracker : impTrackers) {
-                addImpressionTracker(tracker);
-            }
-            List<String> clkTrackers = nativeAdUnit.getClickTrackers();
-            for (String tracker : clkTrackers) {
-                addClickTracker(tracker);
-            }
+
             final List<String> imageUrls = new ArrayList<String>();
             final String mainImageUrl = nativeAdUnit.getMainImage();
             if (mainImageUrl != null && !mainImageUrl.isEmpty()) {
